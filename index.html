@@ -1,0 +1,2497 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#1F4C46">
+<title>Szómondó — magyar szótanuló</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&family=Permanent+Marker&family=Bangers&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #FAF6EE;
+    --ink: #26221D;
+    --ink-soft: #6b6459;
+    --paprika: #C1440E;
+    --paprika-deep: #9c3608;
+    --teal: #1F4C46;
+    --gold: #D9A441;
+    --green: #2E7D46;
+    --red: #C13B3B;
+    --neutral-bg: #C9C2AE;
+    --neutral-border: #8f8875;
+    --card: #FFFFFF;
+    --line: #E8DFCF;
+    --line-strong: #B7A783;
+    --radius: 18px;
+  }
+  html.dark-theme{
+    --bg: #232323;
+    --ink: #EDEAE4;
+    --ink-soft: #A8A39A;
+    --paprika: #E0692F;
+    --paprika-deep: #C1440E;
+    --teal: #3A8177;
+    --gold: #D9A441;
+    --green: #4CAF6D;
+    --red: #E05C5C;
+    --neutral-bg: #4A4A4A;
+    --neutral-border: #666666;
+    --card: #2E2E2E;
+    --line: #444444;
+    --line-strong: #5A5A5A;
+  }
+  *{ box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html,body{ margin:0; padding:0; touch-action: manipulation; background: #1F4C46; }
+  body{
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+  }
+  .app{
+    width: 100%;
+    max-width: 460px;
+    padding: 14px 18px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+  }
+
+  .top-controls-grid{
+    display: grid;
+    grid-template-columns: auto auto auto;
+    align-items: center;
+    gap: 6px;
+  }
+  .menu-wrap{
+    position: relative;
+  }
+  .menu-btn-small{
+    padding: 4px 10px;
+    font-size: 14px;
+  }
+  .menu-panel{
+    display: none;
+    flex-direction: column;
+    gap: 6px;
+    position: absolute;
+    top: 30px;
+    left: 0;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 8px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    z-index: 10;
+    min-width: 200px;
+  }
+  .menu-panel.show{ display: flex; }
+  .menu-panel button{
+    background: none;
+    border: none;
+    text-align: left;
+    padding: 14px 14px;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .menu-panel button:hover{ background: var(--bg); }
+
+  .mic-row{
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .flag-btn{
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    border: 2px solid transparent;
+    background: var(--card);
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    opacity: 0.45;
+    flex-shrink: 0;
+    transition: opacity 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  }
+  .flag-btn.active{
+    opacity: 1;
+    border-color: var(--paprika);
+    transform: scale(1.08);
+  }
+  .mic-wrap{
+    margin-left: auto;
+    position: relative;
+  }
+  #micBtn{
+    width: 88px;
+    height: 88px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+    touch-action: none;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.18);
+    transition: transform 0.15s ease, background 0.2s ease, box-shadow 0.2s ease;
+  }
+  #micBtn::before{
+    content: "";
+    position: absolute;
+    inset: 5px;
+    border-radius: 50%;
+    border: 3px dashed rgba(193,68,14,0.65);
+    pointer-events: none;
+    transition: border-color 0.2s ease;
+  }
+  #micBtn.listening::before{
+    border-color: var(--green);
+  }
+  #micBtn:active{ transform: scale(0.96); }
+  #micQuestionBadge{
+    position: absolute;
+    top: -4px;
+    right: -4px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--card);
+    color: var(--ink);
+    border: 3px dashed rgba(193,68,14,0.65);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    z-index: 2;
+    transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+  }
+  #micQuestionBadge.listening{
+    background: var(--green);
+    border-color: var(--green);
+    color: #fff;
+  }
+  #micQuestionBadge:active{ transform: scale(0.92); }
+  #micBtn.listening{
+    background: var(--green);
+    color: #fff;
+    animation: pulse 1.4s infinite;
+  }
+  @keyframes pulse{
+    0%{ box-shadow: 0 0 0 0 rgba(46,125,70,0.45); }
+    70%{ box-shadow: 0 0 0 22px rgba(46,125,70,0); }
+    100%{ box-shadow: 0 0 0 0 rgba(46,125,70,0); }
+  }
+  #micBtn svg{ width: 34px; height: 34px; }
+
+  .menu-wrap-full{ grid-column: 1 / -1; }
+  .question-btn{
+    width: 42px;
+    height: 42px;
+    border-radius: 11px;
+    border: 2px solid var(--line);
+    background: var(--card);
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--ink-soft);
+    opacity: 0.6;
+  }
+  .question-btn.active{
+    border-color: var(--paprika);
+    color: var(--paprika-deep);
+    background: rgba(193,68,14,0.12);
+    opacity: 1;
+  }
+  .question-btn.flash-red, .action-btn.flash-red, .icon-btn.flash-red{
+    animation: flashRed 0.5s ease;
+  }
+  @keyframes flashRed{
+    0%, 100% { background: var(--card); border-color: var(--line); }
+    30% { background: rgba(193,59,59,0.35); border-color: var(--red); }
+  }
+  @keyframes flashGreen{
+    0%, 100% { background: var(--card); border-color: var(--line); }
+    30% { background: rgba(46,125,70,0.35); border-color: var(--green); }
+  }
+  .icon-btn.flash-incorrect{ animation: flashRed 0.6s ease; }
+  .icon-btn.flash-correct{ animation: flashGreen 0.6s ease; }
+  .practice-answer-row input.correct-bg{
+    background: rgba(46,125,70,0.15);
+    border-color: var(--green);
+  }
+
+  .error-status{
+    font-size: 13px;
+    color: var(--paprika-deep);
+    text-align: center;
+    display: none;
+  }
+  .error-status.show{ display: block; }
+
+  .fallback-row{ display: flex; gap: 8px; }
+  .fallback-row input{
+    flex: 1;
+    padding: 12px 14px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    font-family: 'Work Sans', sans-serif;
+    font-size: 15px;
+    background: var(--card);
+    color: var(--ink);
+  }
+  .fallback-row button{
+    padding: 0 16px;
+    border-radius: 12px;
+    border: none;
+    background: var(--teal);
+    color: #fff;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+  }
+
+  .result-card{
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 18px 18px 16px;
+    border: 1px solid var(--line);
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+  }
+  .result-card.show{ display: flex; }
+  .result-card::before{
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border-radius: 13px;
+    border: 3px dashed rgba(193,68,14,0.45);
+    pointer-events: none;
+  }
+  .lang-tag{
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    padding: 2px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    display: inline-block;
+  }
+  .lang-tag.hu{ background: rgba(217,164,65,0.2); color: var(--paprika-deep); }
+  .lang-tag.fx{ background: rgba(31,76,70,0.12); color: var(--teal); }
+  .orig-text{ font-size: 15px; color: var(--ink-soft); outline: none; border-radius: 8px; padding: 6px 8px; margin: -6px -8px; background: rgba(0,0,0,0.035); min-height: 1.4em; }
+
+  .trans-text{
+    font-family: 'Fraunces', serif;
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 1.25;
+    outline: none;
+    border-radius: 8px;
+    padding: 6px 8px;
+    margin: -6px -8px;
+    background: rgba(0,0,0,0.035);
+    min-height: 1.3em;
+  }
+  .orig-text:focus, .trans-text:focus{ background: rgba(193,68,14,0.06); box-shadow: 0 0 0 1px rgba(193,68,14,0.3); }
+  .result-main{
+    display: flex;
+    gap: 10px;
+  }
+  .result-text{
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .result-actions{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-shrink: 0;
+    margin-top: auto;
+  }
+  .action-btn{
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--ink-soft);
+    font-size: 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .action-btn:hover{ filter: brightness(0.93); }
+  .action-btn.active{
+    border-color: var(--paprika);
+    color: var(--paprika-deep);
+    background: rgba(193,68,14,0.12);
+  }
+  .action-btn.listening-active{ background: var(--neutral-bg); border-color: var(--neutral-border); color: var(--ink); }
+  .icon-btn{
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 8px 12px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+    display:flex; align-items:center; gap:6px;
+  }
+  .icon-btn:hover{ filter: brightness(0.93); }
+  .icon-btn:disabled{ opacity: 0.45; cursor: default; }
+  .icon-btn.listening-active{ background: var(--neutral-bg); border-color: var(--neutral-border); color: var(--ink); }
+  .icon-btn.order-active{ background: var(--paprika); border-color: var(--paprika); color: #fff; }
+
+  section.history{ display: flex; flex-direction: column; gap: 10px; }
+  .history-head{ display: flex; align-items: baseline; padding: 0 2px; }
+  .history-head h2{ font-family: 'Fraunces', serif; font-size: 16px; font-weight: 600; margin: 0; }
+  .history-head span{ font-size: 12px; color: var(--ink-soft); margin-left: auto; }
+  .play-row{ display: flex; gap: 6px; align-items: center; }
+  #allSelectBtn{ padding: 3px 10px; font-size: 12px; font-weight: 700; }
+  .play-row .icon-btn{ flex: 1; justify-content: center; padding: 5px 6px; font-size: 12px; }
+  .play-row #orderBtn{ flex: 0 0 auto; padding: 5px 8px; }
+  .play-row #playFxBtn{ flex: 0 0 auto; padding: 5px 10px; }
+  .play-row #playAllBtn{ flex: 0 0 auto; padding: 5px 10px; }
+  .play-row #deleteModeBtn{ flex: 0 0 auto; padding: 5px 8px; }
+  .play-row #addMemBtn{ flex: 0 0 auto; padding: 5px 8px; }
+  .play-row #deleteModeBtn.active{ background: var(--red); border-color: var(--red); color: #fff; }
+  .play-row #addMemBtn.active{ background: var(--teal); border-color: var(--teal); color: #fff; }
+  .history-list{
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    max-height: 58vh;
+    overflow-y: auto;
+    padding-right: 2px;
+  }
+  .group-divider{ grid-column: 1 / -1; border-top: 2px dashed var(--line-strong); margin: 4px 0; }
+  .hist-item{
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 6px 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1px;
+    cursor: pointer;
+    user-select: none;
+    min-width: 0;
+    text-align: center;
+  }
+  .hist-item:hover{ border-color: var(--paprika); }
+  .hist-item.selected{ border-color: var(--paprika); background: rgba(193,68,14,0.07); }
+  .hist-hu{ font-size: 10px; color: var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 100%; }
+  .hist-fx{ font-size: 12px; font-weight: 600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 100%; }
+  .empty-state{
+    grid-column: 1 / -1;
+    font-size: 13px;
+    color: var(--ink-soft);
+    text-align: center;
+    padding: 18px 10px;
+    border: 1px dashed var(--line);
+    border-radius: 12px;
+  }
+  .memory-overlay{
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 100;
+  }
+  .memory-overlay.show{ display: flex; justify-content: center; }
+  .memory-panel{
+    background: var(--bg);
+    width: 100%;
+    max-width: 460px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .memory-sticky-top{ flex-shrink: 0; }
+  .memory-header{
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 16px 8px;
+  }
+  .memory-lang-frame{
+    width: 38px;
+    height: 38px;
+    border: 2px solid var(--paprika);
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 13px;
+    color: var(--paprika-deep);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .memory-header-btns{ margin-left: auto; }
+  .memory-header h2{
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0;
+  }
+  .memory-header-btns{
+    display: flex;
+    gap: 5px;
+  }
+  .header-icon-btn{
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--ink-soft);
+    font-size: 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .header-icon-btn.active{
+    background: var(--paprika);
+    border-color: var(--paprika);
+    color: #fff;
+  }
+  #memoryAllBtn{ width: auto; padding: 0 8px; font-weight: 700; }
+  #memoryTable tr.selected td{
+    background: rgba(193,68,14,0.1);
+  }
+  #memoryTable tr.block-end td{
+    border-bottom: 3px dashed rgba(193,68,14,0.65);
+  }
+  .memory-toolbar{
+    display: flex;
+    gap: 6px;
+    padding: 0 16px 10px;
+  }
+  .memory-toolbar .icon-btn{ flex: 1; justify-content: center; font-size: 12px; padding: 6px 6px; }
+  .memory-table-wrap{
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    overflow-x: auto;
+    padding: 0 8px 16px;
+  }
+  #memoryTable{
+    width: 100%;
+    min-width: 680px;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  #memoryTable th{
+    text-align: left;
+    font-size: 11px;
+    color: var(--ink-soft);
+    font-weight: 600;
+    padding: 6px;
+    border-bottom: 1px solid var(--line);
+    white-space: nowrap;
+  }
+  #memoryTable td{
+    padding: 8px 6px;
+    border-bottom: 1px solid var(--line);
+    vertical-align: middle;
+    min-width: 110px;
+  }
+  #memoryTable td.memory-del-cell{
+    min-width: 0;
+    width: 38px;
+    padding: 8px 4px;
+    text-align: center;
+  }
+  #memoryTable td[contenteditable]{
+    outline: none;
+    word-break: break-word;
+  }
+  #memoryTable th + th,
+  #memoryTable td + td{
+    border-left: 1px solid var(--line-strong);
+  }
+  #memoryTable td[contenteditable]:focus{
+    background: rgba(193,68,14,0.06);
+    box-shadow: 0 0 0 1px rgba(193,68,14,0.3);
+    border-radius: 6px;
+  }
+  .memory-del{
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: none;
+    background: var(--card);
+    color: var(--paprika-deep);
+    font-size: 14px;
+    margin: 0 auto;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #practiceBtn{
+    font-size: 12px;
+    padding: 8px 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .practice-translate-col{
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  #translateBtn{
+    font-size: 12px;
+    padding: 8px 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .practice-overlay{
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    z-index: 100;
+    overflow-y: auto;
+  }
+  .practice-overlay.show{ display: block; }
+  .practice-panel{
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    padding: 8px 18px;
+    max-width: 460px;
+    margin: 0 auto;
+    min-height: 100%;
+  }
+  .practice-top-row{
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .mic-size-btn{
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: none;
+    background: var(--teal);
+    color: #fff;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .practice-progress{
+    flex: 1;
+    font-size: 12px;
+    color: var(--ink-soft);
+  }
+  #practiceDirectionBtn{
+    flex-shrink: 0;
+    font-size: 12px;
+    padding: 8px 10px;
+    white-space: nowrap;
+  }
+  .practice-card{
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 18px 18px 16px;
+    border: 1px solid var(--line);
+    position: relative;
+  }
+  .practice-card::before{
+    content: "";
+    position: absolute;
+    inset: 6px;
+    border-radius: 13px;
+    border: 3px dashed rgba(193,68,14,0.45);
+    pointer-events: none;
+  }
+  .practice-prompt{
+    font-family: 'Fraunces', serif;
+    font-size: 26px;
+    font-weight: 600;
+    text-align: center;
+    padding: 10px;
+    color: var(--ink);
+  }
+  .practice-answer-row{
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    position: relative;
+    z-index: 1;
+  }
+  .practice-answer-row input{
+    flex: 1;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    font-family: 'Work Sans', sans-serif;
+    font-size: 15px;
+    background: rgba(0,0,0,0.035);
+    color: var(--ink);
+  }
+  .practice-answer-row input:focus{
+    outline: none;
+    background: rgba(193,68,14,0.06);
+    box-shadow: 0 0 0 1px rgba(193,68,14,0.3);
+  }
+  .practice-controls-row{
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    position: relative;
+    z-index: 1;
+  }
+  .practice-controls-row #practiceCheckBtn{
+    flex: 1;
+    justify-content: center;
+    background: var(--paprika);
+    border-color: var(--paprika);
+    color: #fff;
+    font-weight: 600;
+  }
+  .practice-controls-row #practiceCheckBtn:hover{ background: var(--paprika-deep); }
+  .practice-feedback{
+    min-height: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    margin-top: 10px;
+    position: relative;
+    z-index: 1;
+  }
+  .practice-feedback.correct{ color: var(--green); }
+  .practice-feedback.incorrect{ color: var(--red); }
+  .visual-effect-overlay{
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: linear-gradient(120deg, #C1440E, #D9A441, #1F4C46, #6a4fb3, #2e7d46, #C1440E);
+    background-size: 300% 300%;
+    animation: veBgShift 10s ease infinite;
+    z-index: 110;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .visual-effect-overlay.show{ display: flex; }
+  @keyframes veBgShift{
+    0%{ background-position: 0% 50%; }
+    50%{ background-position: 100% 50%; }
+    100%{ background-position: 0% 50%; }
+  }
+  .visual-effect-panel{
+    position: relative;
+    z-index: 1;
+    width: 100%;
+    max-width: 420px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  .ve-bg-layer{
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+  .ve-spark{
+    position: absolute;
+    border-radius: 50%;
+    background: var(--sc);
+    box-shadow: 0 0 10px 3px var(--sc);
+    animation: veSparkTwinkle 1.6s ease-in-out infinite;
+  }
+  @keyframes veSparkTwinkle{
+    0%,100%{ opacity: 0; transform: scale(0.3); }
+    50%{ opacity: 1; transform: scale(1.3); }
+  }
+  .ve-blob{
+    position: absolute;
+    border-radius: 45% 55% 60% 40% / 50% 45% 55% 50%;
+    background: radial-gradient(circle, var(--bc), transparent 70%);
+    filter: blur(4px);
+    opacity: 0.6;
+    animation: veBlobPulse 3.5s ease-in-out infinite;
+  }
+  @keyframes veBlobPulse{
+    0%,100%{ transform: scale(1) rotate(0deg); }
+    50%{ transform: scale(1.18) rotate(10deg); }
+  }
+  .visual-effect-overlay, .visual-effect-panel, .ve-word, .ve-word-unit, .ve-word span{
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .ve-word{ position: relative; z-index: 1; }
+  #visualEffectCloseBtn, #visualEffectExampleBtn, #visualEffectHuBtn{
+    position: fixed;
+    right: 18px;
+    background: var(--card);
+    z-index: 111;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-size: 18px;
+  }
+  #visualEffectCloseBtn{
+    top: 18px;
+    width: 48px;
+    height: 48px;
+  }
+  #visualEffectExampleBtn{
+    top: 74px;
+    width: 48px;
+    height: 48px;
+  }
+  #visualEffectHuBtn{
+    top: 130px;
+    width: 48px;
+    height: 68px;
+    font-size: 16px;
+    font-weight: 700;
+  }
+  #veHuReveal{
+    display: none;
+    position: fixed;
+    top: 40px;
+    left: calc((100vw - 66px) / 2);
+    transform: translateX(-50%);
+    background: var(--card);
+    color: var(--ink);
+    font-family: 'Work Sans', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    padding: 14px 20px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    z-index: 120;
+    max-width: 82%;
+    text-align: center;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  }
+  #veHuReveal::before{
+    content: "";
+    position: absolute;
+    inset: 5px;
+    border-radius: 13px;
+    border: 3px dashed rgba(193,68,14,0.45);
+    pointer-events: none;
+  }
+  #veHuReveal.show{ display: block; }
+  .ve-word{
+    font-family: 'Fraunces', serif;
+    font-size: 84px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 1.2;
+  }
+  .ve-word-unit{ display: inline-block; white-space: nowrap; }
+  .ve-word span{ display: inline-block; margin: 0 4px; }
+  @keyframes veColor{
+    0%,100%{ color: #ff6b6b; }
+    14%{ color: #ffd166; }
+    28%{ color: #4ecdc4; }
+    42%{ color: #a78bfa; }
+    57%{ color: #ff8fab; }
+    71%{ color: #6bd47a; }
+    85%{ color: #5aa9ff; }
+  }
+  @keyframes veBounce{
+    0%,100%{ transform: translateY(0); }
+    50%{ transform: translateY(-16px); }
+  }
+  @keyframes vePulseScale{
+    0%,100%{ transform: scale(1); }
+    50%{ transform: scale(1.18); }
+  }
+  @keyframes veSpin{
+    0%,100%{ transform: rotate(-10deg); }
+    50%{ transform: rotate(10deg); }
+  }
+  @keyframes veHandwrite{
+    0%{ opacity: 0; transform: translateX(-6px); }
+    100%{ opacity: 1; transform: translateX(0); }
+  }
+  @keyframes veFlashAccent{
+    0%{ text-shadow: 0 0 0 transparent; }
+    18%{ text-shadow: 0 0 16px #ffffff, 0 0 26px var(--lc, #ffe27a); }
+    100%{ text-shadow: 0 0 0 transparent; }
+  }
+  .ve-word.ve-wave span{ animation: veColor 2.2s ease-in-out infinite, veBounce 1.1s ease-in-out infinite, veFlashAccent 0.5s ease-out forwards; }
+  .ve-word.ve-pulse span{ animation: veColor 2.2s ease-in-out infinite, vePulseScale 1.3s ease-in-out infinite, veFlashAccent 0.5s ease-out forwards; }
+  .ve-word.ve-spin span{ animation: veColor 2.2s ease-in-out infinite, veSpin 1.5s ease-in-out infinite, veFlashAccent 0.5s ease-out forwards; }
+  .ve-word.ve-handwrite span{
+    color: var(--lc, #ffffff);
+    opacity: 0;
+    animation: veHandwrite 0.3s ease-out forwards, veFlashAccent 0.5s ease-out forwards;
+    animation-delay: var(--d, 0s);
+  }
+  .ve-word.ve-paintbrush span{
+    color: transparent;
+    text-shadow: 0 0 0 transparent;
+    animation: vePaintReveal 0.4s ease forwards, veFlashAccent 0.5s ease-out forwards;
+    animation-delay: var(--d, 0s);
+  }
+  @keyframes vePaintReveal{
+    0%{ color: transparent; text-shadow: 0 0 0 transparent; }
+    35%{ color: #ffe27a; text-shadow: 0 6px 12px var(--paprika); }
+    70%{ color: #ff8fab; text-shadow: 0 4px 10px #4ecdc4; }
+    100%{ color: var(--lc, #ffffff); text-shadow: 0 0 0 transparent; }
+  }
+  .ve-word.ve-pour span{
+    display: inline-block;
+    color: transparent;
+    transform: translateY(-40px) scaleY(1.6);
+    animation: vePourReveal 0.4s cubic-bezier(.36,1.4,.6,1) forwards, veFlashAccent 0.5s ease-out forwards;
+    animation-delay: var(--d, 0s);
+  }
+  @keyframes vePourReveal{
+    0%{ color: transparent; transform: translateY(-40px) scaleY(1.6); }
+    55%{ color: #ffd166; transform: translateY(6px) scaleY(0.85); }
+    100%{ color: var(--lc, #ffffff); transform: translateY(0) scaleY(1); }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="mic-row">
+    <div class="top-controls-grid">
+      <div class="menu-wrap menu-wrap-full">
+        <button class="icon-btn menu-btn-small" id="menuBtn" aria-label="Export / Import">⋯</button>
+        <div class="menu-panel" id="menuPanel">
+          <button id="memoryOpenBtn">🧠 Memória</button>
+          <button id="themeToggleBtn">🌗 Sötét téma</button>
+        </div>
+      </div>
+      <button class="flag-btn active" id="langFlagBtn" data-lang="en" aria-label="Nyelv váltása">🇺🇸</button>
+      <button class="question-btn" id="saveBtn" aria-label="Mentés">＋</button>
+    </div>
+    <div class="practice-translate-col">
+      <button class="icon-btn" id="practiceBtn" aria-label="Gyakorlás">Gyakorlás</button>
+      <button class="icon-btn" id="translateBtn" aria-label="Fordítás">Fordítás</button>
+    </div>
+    <div class="mic-wrap">
+      <button id="micBtn" aria-label="Felvétel indítása">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="23"></line>
+          <line x1="8" y1="23" x2="16" y2="23"></line>
+        </svg>
+      </button>
+      <button id="micQuestionBadge" aria-label="Kérdő mondat felvétele">?</button>
+    </div>
+  </div>
+  <div class="error-status" id="errorStatus"></div>
+
+  <div class="practice-overlay" id="practiceOverlay">
+    <div class="practice-panel">
+      <div class="practice-top-row">
+        <button class="mic-size-btn" id="practiceNextGroupBtn" aria-label="Következő csoport">✓</button>
+        <button class="icon-btn" id="practiceDirectionBtn" aria-label="Irány váltása">HU→EN</button>
+        <div class="practice-progress" id="practiceProgress"></div>
+        <button class="icon-btn" id="practiceCloseBtn" aria-label="Bezárás">✕</button>
+      </div>
+
+      <div id="practiceDrillView">
+        <div class="practice-card">
+          <div class="practice-prompt" id="practicePrompt"></div>
+          <div class="practice-answer-row">
+            <input type="text" id="practiceInput" placeholder="Írd be a fordítást">
+            <button class="action-btn" id="practiceMicBtn" aria-label="Válasz bemondása">🎤</button>
+          </div>
+          <div class="practice-controls-row">
+            <button class="icon-btn" id="practiceCheckBtn">Ellenőrzés</button>
+            <button class="action-btn" id="practiceNextWordBtn" aria-label="Következő szó">→</button>
+          </div>
+          <div class="practice-feedback" id="practiceFeedback"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="fallback-row" id="fallbackRow" style="display:none;">
+    <input type="text" id="textInput" placeholder="Írj be egy szót">
+    <button id="textGo">Fordít</button>
+  </div>
+
+  <div class="result-card show" id="resultCard">
+    <div class="result-main">
+      <div class="result-text">
+        <span class="lang-tag hu" id="tag1">HU</span>
+        <div class="orig-text" id="origText" contenteditable="true"></div>
+        <span class="lang-tag fx" id="tag2">EN</span>
+        <div class="trans-text" id="transText" contenteditable="true"></div>
+      </div>
+      <div class="result-actions">
+        <button class="action-btn" id="visualEffectBtn" aria-label="Vizuális hatás">✨</button>
+        <button class="action-btn" id="exampleBtn" aria-label="Példamondat">💬</button>
+        <button class="action-btn" id="speakBtn" aria-label="Felolvasás">🔊</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="visual-effect-overlay" id="visualEffectOverlay">
+    <div class="ve-bg-layer" id="visualEffectBgLayer"></div>
+    <button class="icon-btn" id="visualEffectCloseBtn" aria-label="Bezárás">✕</button>
+    <button class="icon-btn" id="visualEffectExampleBtn" aria-label="Példamondat">💬</button>
+    <button class="icon-btn" id="visualEffectHuBtn" aria-label="Magyar mutatása">HU</button>
+    <div id="veHuReveal"></div>
+    <div class="visual-effect-panel">
+      <div class="ve-word" id="visualEffectWord"></div>
+    </div>
+  </div>
+
+  <section class="history">
+    <div class="history-head">
+      <button class="icon-btn" id="allSelectBtn" style="display:none;">ALL</button>
+      <span id="dictCount">0 szó</span>
+    </div>
+    <div class="play-row">
+      <button class="icon-btn" id="deleteModeBtn" aria-label="Törlés mód">✕</button>
+      <button class="icon-btn" id="addMemBtn" aria-label="Mentés memóriába mód">＋</button>
+      <button class="icon-btn" id="playFxBtn">▶ Angol</button>
+      <button class="icon-btn" id="playAllBtn">▶ Angol + Magyar</button>
+      <button class="icon-btn" id="orderBtn" aria-label="Sorrend csere">⇅</button>
+    </div>
+    <div class="history-list" id="historyList">
+      <div class="empty-state">Még nincs elmentett szavad.</div>
+    </div>
+  </section>
+
+  <div class="memory-overlay" id="memoryOverlay">
+    <div class="memory-panel">
+      <div class="memory-sticky-top">
+        <div class="memory-header">
+          <div class="memory-lang-frame" id="memoryLangTag">EN</div>
+          <div class="memory-header-btns">
+            <button class="header-icon-btn" id="memoryAllBtn" style="display:none;">ALL</button>
+            <button class="header-icon-btn" id="memoryAddBtn" aria-label="Kijelölés a szótárba">＋</button>
+            <button class="header-icon-btn" id="memoryJumpTopBtn" aria-label="Ugrás az elejére">⤒</button>
+            <button class="header-icon-btn" id="memoryJumpBottomBtn" aria-label="Ugrás a végére">⤓</button>
+            <button class="header-icon-btn" id="memoryCloseBtn" aria-label="Bezárás">✕</button>
+          </div>
+        </div>
+        <div class="memory-toolbar">
+          <button class="icon-btn" id="memoryImportBtn">⬆ Import (CSV)</button>
+          <button class="icon-btn" id="memoryExportBtn">⬇ Export</button>
+        </div>
+      </div>
+      <div class="memory-table-wrap" id="memoryTableWrap">
+        <table id="memoryTable">
+          <thead><tr><th></th><th>Magyar szó</th><th id="memoryColHead">Idegen szó</th><th>Magyar mondat</th><th id="memoryColHeadSentence">Idegen mondat</th></tr></thead>
+          <tbody id="memoryTableBody"></tbody>
+        </table>
+        <div class="empty-state" id="memoryEmptyState" style="display:none;">Még nincs semmi a memóriában ezen a nyelven.</div>
+      </div>
+    </div>
+  </div>
+
+
+</div>
+
+<script>
+(function(){
+  const micBtn = document.getElementById('micBtn');
+  const micQuestionBadge = document.getElementById('micQuestionBadge');
+  const langFlagBtn = document.getElementById('langFlagBtn');
+  const menuBtn = document.getElementById('menuBtn');
+  const menuPanel = document.getElementById('menuPanel');
+  const errorStatus = document.getElementById('errorStatus');
+  const fallbackRow = document.getElementById('fallbackRow');
+  const textInput = document.getElementById('textInput');
+  const textGo = document.getElementById('textGo');
+  const resultCard = document.getElementById('resultCard');
+  const origText = document.getElementById('origText');
+  const transText = document.getElementById('transText');
+  const memoryOpenBtn = document.getElementById('memoryOpenBtn');
+  const themeToggleBtn = document.getElementById('themeToggleBtn');
+  const memoryOverlay = document.getElementById('memoryOverlay');
+  const memoryCloseBtn = document.getElementById('memoryCloseBtn');
+  const memoryAllBtn = document.getElementById('memoryAllBtn');
+  const memoryAddBtn = document.getElementById('memoryAddBtn');
+  const memoryLangTag = document.getElementById('memoryLangTag');
+  const memoryColHead = document.getElementById('memoryColHead');
+  const memoryColHeadSentence = document.getElementById('memoryColHeadSentence');
+  const memoryImportBtn = document.getElementById('memoryImportBtn');
+  const memoryExportBtn = document.getElementById('memoryExportBtn');
+  const memoryTableBody = document.getElementById('memoryTableBody');
+  const memoryEmptyState = document.getElementById('memoryEmptyState');
+
+  const exampleBtn = document.getElementById('exampleBtn');
+  const visualEffectBtn = document.getElementById('visualEffectBtn');
+  const visualEffectOverlay = document.getElementById('visualEffectOverlay');
+  const visualEffectCloseBtn = document.getElementById('visualEffectCloseBtn');
+  const visualEffectExampleBtn = document.getElementById('visualEffectExampleBtn');
+  const visualEffectHuBtn = document.getElementById('visualEffectHuBtn');
+  const veHuReveal = document.getElementById('veHuReveal');
+  const visualEffectWord = document.getElementById('visualEffectWord');
+  const visualEffectBgLayer = document.getElementById('visualEffectBgLayer');
+
+  const practiceBtn = document.getElementById('practiceBtn');
+  const translateBtn = document.getElementById('translateBtn');
+  const practiceOverlay = document.getElementById('practiceOverlay');
+  const practiceCloseBtn = document.getElementById('practiceCloseBtn');
+  const practiceDrillView = document.getElementById('practiceDrillView');
+  const practiceDirectionBtn = document.getElementById('practiceDirectionBtn');
+  const practiceProgress = document.getElementById('practiceProgress');
+  const practicePrompt = document.getElementById('practicePrompt');
+  const practiceInput = document.getElementById('practiceInput');
+  const practiceMicBtn = document.getElementById('practiceMicBtn');
+  const practiceFeedback = document.getElementById('practiceFeedback');
+  const practiceNextGroupBtn = document.getElementById('practiceNextGroupBtn');
+  const practiceCheckBtn = document.getElementById('practiceCheckBtn');
+  const practiceNextWordBtn = document.getElementById('practiceNextWordBtn');
+  const tag1 = document.getElementById('tag1');
+  const tag2 = document.getElementById('tag2');
+  const speakBtn = document.getElementById('speakBtn');
+  const saveBtn = document.getElementById('saveBtn');
+  const historyList = document.getElementById('historyList');
+  const dictCount = document.getElementById('dictCount');
+  const playFxBtn = document.getElementById('playFxBtn');
+  const playAllBtn = document.getElementById('playAllBtn');
+  const orderBtn = document.getElementById('orderBtn');
+  const deleteModeBtn = document.getElementById('deleteModeBtn');
+  const allSelectBtn = document.getElementById('allSelectBtn');
+  const addMemBtn = document.getElementById('addMemBtn');
+  const memoryJumpTopBtn = document.getElementById('memoryJumpTopBtn');
+  const memoryJumpBottomBtn = document.getElementById('memoryJumpBottomBtn');
+  const memoryTableWrap = document.getElementById('memoryTableWrap');
+
+  const LANGS = {
+    en: { label: 'Angol', tag: 'EN', tts: 'en-US', flag: '🇺🇸' },
+    es: { label: 'Spanyol', tag: 'ES', tts: 'es-ES', flag: '🇪🇸' },
+    de: { label: 'Német', tag: 'DE', tts: 'de-DE', flag: '🇩🇪' }
+  };
+  let selectedLang = 'en';
+
+  const STORAGE_KEY = 'hu-multi-dictionary-v1';
+  const OLD_KEY = 'hu-en-dictionary-v3';
+  let entries = []; // {id, hu, foreign, lang, updatedAt}
+  let selectedIndex = 0;
+  let pendingEntry = null;
+  let pendingSourceId = null;
+  let lastTarget = null;
+  let currentForeignText = null;
+  let currentForeignLang = 'en';
+  let currentSourceIsHu = true;
+  let exampleModeActive = false;
+  let savedOrigText = '';
+  let savedTransText = '';
+  let exampleFxSentence = '';
+  let exampleFxLang = 'en-US';
+  let playingMode = null;
+  let stopPlayback = false;
+  let huFirst = false;
+  let deleteMode = false;
+  let deleteSelectedIds = new Set();
+  let addMemMode = false;
+  let addMemSelectedIds = new Set();
+  const MEMORY_KEY = 'hu-multi-memory-v1';
+  let memoryEntries = []; // {id, hu, foreign, lang, updatedAt}
+
+  function norm(s){ return String(s == null ? '' : s).trim().toLowerCase().replace(/[.,!?;:¿¡]+$/,'').replace(/^[¿¡]+/,''); }
+  function makeId(){ return 'e' + Date.now() + Math.random().toString(36).slice(2,7); }
+
+  function loadMemory(){
+    try{
+      const raw = localStorage.getItem(MEMORY_KEY);
+      const parsed = raw ? JSON.parse(raw) : [];
+      memoryEntries = Array.isArray(parsed) ? parsed : [];
+    }catch(e){ memoryEntries = []; }
+  }
+  function saveMemoryToDisk(){
+    try{
+      localStorage.setItem(MEMORY_KEY, JSON.stringify(memoryEntries));
+    }catch(e){
+      showError('Nem sikerült menteni — lehet, hogy betelt a tárhely.');
+    }
+  }
+  function findInMemory(text){
+    const n = norm(text);
+    return memoryEntries.find(e => e.lang === selectedLang && (norm(huOf(e)) === n || norm(fxOf(e)) === n));
+  }
+
+  function loadDictionary(){
+    try{
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw){
+        const parsed = JSON.parse(raw);
+        entries = Array.isArray(parsed) ? parsed : [];
+      } else {
+        const oldRaw = localStorage.getItem(OLD_KEY);
+        if(oldRaw){
+          const parsed = JSON.parse(oldRaw);
+          const list = Array.isArray(parsed) ? parsed : Object.values(parsed);
+          entries = list.map(v => ({ id: makeId(), hu: v.hu, foreign: v.en, lang: 'en', updatedAt: v.updatedAt || Date.now() }));
+        }
+      }
+    }catch(e){ entries = []; }
+    renderHistory();
+  }
+  function saveDictionaryToDisk(){
+    try{
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+    }catch(e){
+      showError('Nem sikerült menteni — lehet, hogy betelt a tárhely.');
+    }
+  }
+
+  function huOf(e){ return e.swapped ? e.foreign : e.hu; }
+  function fxOf(e){ return e.swapped ? e.hu : e.foreign; }
+  function setHu(e, value){ if(e.swapped){ e.foreign = value; } else { e.hu = value; } }
+  function setFx(e, value){ if(e.swapped){ e.hu = value; } else { e.foreign = value; } }
+
+  function getVisibleEntries(){
+    return entries.filter(e => e.lang === selectedLang);
+  }
+  function findEntry(text){
+    const n = norm(text);
+    return entries.find(e => e.lang === selectedLang && (norm(huOf(e)) === n || norm(fxOf(e)) === n));
+  }
+  function escapeHtml(s){
+    const d = document.createElement('div'); d.textContent = s; return d.innerHTML;
+  }
+  function getPlaybackEntries(){
+    const visible = getVisibleEntries();
+    return visible.slice(selectedIndex, selectedIndex + 5);
+  }
+
+  function updatePlayButtonLabels(){
+    const tag = LANGS[selectedLang].tag;
+    if(playingMode !== 'fx') playFxBtn.textContent = '▶ ' + tag;
+    if(playingMode !== 'fx-hu'){
+      playAllBtn.textContent = huFirst ? ('▶ HU+' + tag) : ('▶ ' + tag + '+HU');
+    }
+    memoryLangTag.textContent = tag;
+    memoryColHead.textContent = tag + ' szó';
+    memoryColHeadSentence.textContent = tag + ' mondat';
+  }
+
+  let memorySelectMode = false;
+  let memorySelectedIds = new Set();
+
+  function isMemorySentenceEntry(e){
+    return !!(e.huSentence && e.huSentence.trim() && e.fxSentence && e.fxSentence.trim());
+  }
+  function getVisibleMemoryEntries(){
+    return memoryEntries.filter(e => e.lang === selectedLang);
+  }
+
+  function renderMemoryTable(){
+    const visible = getVisibleMemoryEntries();
+    memoryTableBody.innerHTML = '';
+    memoryEmptyState.style.display = visible.length ? 'none' : 'block';
+    visible.forEach((entry, index) => {
+      const tr = document.createElement('tr');
+      tr.dataset.id = entry.id;
+      if(memorySelectedIds.has(entry.id)) tr.classList.add('selected');
+      // Divider after every 20th row (but not after the very last one)
+      if((index + 1) % 20 === 0 && index !== visible.length - 1){
+        tr.classList.add('block-end');
+      }
+
+      const huTd = document.createElement('td');
+      huTd.contentEditable = memorySelectMode ? 'false' : 'true';
+      huTd.textContent = entry.hu || '';
+      const fxTd = document.createElement('td');
+      fxTd.contentEditable = memorySelectMode ? 'false' : 'true';
+      fxTd.textContent = entry.foreign || '';
+      const huSentTd = document.createElement('td');
+      huSentTd.contentEditable = memorySelectMode ? 'false' : 'true';
+      huSentTd.textContent = entry.huSentence || '';
+      const fxSentTd = document.createElement('td');
+      fxSentTd.contentEditable = memorySelectMode ? 'false' : 'true';
+      fxSentTd.textContent = entry.fxSentence || '';
+
+      const delTd = document.createElement('td');
+      delTd.className = 'memory-del-cell';
+      const delBtn = document.createElement('button');
+      delBtn.className = 'memory-del';
+      delBtn.textContent = '✕';
+      delBtn.setAttribute('aria-label', 'Törlés');
+      delTd.appendChild(delBtn);
+
+      function commit(){
+        entry.hu = huTd.textContent.trim();
+        entry.foreign = fxTd.textContent.trim();
+        entry.huSentence = huSentTd.textContent.trim();
+        entry.fxSentence = fxSentTd.textContent.trim();
+        entry.updatedAt = Date.now();
+        saveMemoryToDisk();
+      }
+      huTd.addEventListener('input', commit);
+      fxTd.addEventListener('input', commit);
+      huSentTd.addEventListener('input', commit);
+      fxSentTd.addEventListener('input', commit);
+      delBtn.addEventListener('click', (ev) => {
+        ev.stopPropagation();
+        if(memorySelectMode && memorySelectedIds.size > 0){
+          memoryEntries = memoryEntries.filter(e => !memorySelectedIds.has(e.id));
+          memorySelectedIds.clear();
+          saveMemoryToDisk();
+          renderMemoryTable();
+          return;
+        }
+        memoryEntries = memoryEntries.filter(e => e.id !== entry.id);
+        memorySelectedIds.delete(entry.id);
+        saveMemoryToDisk();
+        renderMemoryTable();
+      });
+      tr.addEventListener('click', () => {
+        if(!memorySelectMode) return;
+        if(memorySelectedIds.has(entry.id)){
+          memorySelectedIds.delete(entry.id);
+          tr.classList.remove('selected');
+        } else {
+          memorySelectedIds.add(entry.id);
+          tr.classList.add('selected');
+        }
+      });
+
+      tr.appendChild(delTd);
+      tr.appendChild(huTd);
+      tr.appendChild(fxTd);
+      tr.appendChild(huSentTd);
+      tr.appendChild(fxSentTd);
+      memoryTableBody.appendChild(tr);
+    });
+  }
+
+  memoryAddBtn.addEventListener('click', () => {
+    if(!memorySelectMode){
+      memorySelectMode = true;
+      memorySelectedIds.clear();
+      memoryAddBtn.classList.add('active');
+      memoryAllBtn.style.display = 'flex';
+      renderMemoryTable();
+      return;
+    }
+    const toAdd = memoryEntries.filter(e => memorySelectedIds.has(e.id));
+    toAdd.forEach(me => {
+      const hu = (me.hu && me.hu.trim()) ? me.hu : me.huSentence;
+      const foreign = (me.foreign && me.foreign.trim()) ? me.foreign : me.fxSentence;
+      if(!hu || !foreign) return;
+      const existing = entries.find(e => norm(huOf(e)) === norm(hu) && e.lang === me.lang);
+      if(existing){
+        setFx(existing, foreign);
+        existing.updatedAt = Date.now();
+        existing.sourceMemoryId = me.id;
+      } else {
+        entries.push({ id: makeId(), hu, foreign, lang: me.lang, updatedAt: Date.now(), sourceMemoryId: me.id });
+      }
+    });
+    if(toAdd.length){
+      saveDictionaryToDisk();
+      renderHistory();
+    }
+    memorySelectMode = false;
+    memorySelectedIds.clear();
+    memoryAddBtn.classList.remove('active');
+    memoryAllBtn.style.display = 'none';
+    renderMemoryTable();
+  });
+
+  memoryAllBtn.addEventListener('click', () => {
+    const visible = getVisibleMemoryEntries();
+    const allSelected = visible.length > 0 && visible.every(e => memorySelectedIds.has(e.id));
+    if(allSelected) visible.forEach(e => memorySelectedIds.delete(e.id));
+    else visible.forEach(e => memorySelectedIds.add(e.id));
+    renderMemoryTable();
+  });
+
+  memoryOpenBtn.addEventListener('click', () => {
+    menuPanel.classList.remove('show');
+    renderMemoryTable();
+    memoryOverlay.classList.add('show');
+  });
+
+  const THEME_KEY = 'hu-multi-theme';
+  function applyTheme(theme){
+    document.documentElement.classList.toggle('dark-theme', theme === 'dark');
+    themeToggleBtn.textContent = theme === 'dark' ? '☀️ Világos téma' : '🌗 Sötét téma';
+  }
+  function loadTheme(){
+    let theme = 'light';
+    try{ theme = localStorage.getItem(THEME_KEY) || 'light'; }catch(e){}
+    applyTheme(theme);
+  }
+  themeToggleBtn.addEventListener('click', () => {
+    const isDark = document.documentElement.classList.contains('dark-theme');
+    const next = isDark ? 'light' : 'dark';
+    applyTheme(next);
+    try{ localStorage.setItem(THEME_KEY, next); }catch(e){}
+    menuPanel.classList.remove('show');
+  });
+
+  function closeMemoryOverlay(){
+    memoryOverlay.classList.remove('show');
+    memorySelectMode = false;
+    memorySelectedIds.clear();
+    memoryAddBtn.classList.remove('active');
+    memoryAllBtn.style.display = 'none';
+  }
+  memoryCloseBtn.addEventListener('click', closeMemoryOverlay);
+  memoryOverlay.addEventListener('click', (e) => {
+    if(e.target === memoryOverlay) closeMemoryOverlay();
+  });
+
+  memoryJumpTopBtn.addEventListener('click', () => {
+    memoryTableWrap.scrollTop = 0;
+  });
+  memoryJumpBottomBtn.addEventListener('click', () => {
+    memoryTableWrap.scrollTop = memoryTableWrap.scrollHeight;
+  });
+
+  memoryImportBtn.addEventListener('click', () => {
+    pickCsvFile((file) => processMemoryImportFile(file));
+  });
+
+  memoryExportBtn.addEventListener('click', () => {
+    const visible = memoryEntries.filter(e => e.lang === selectedLang);
+    const rows = visible.map(e => csvEscape(e.hu || '', ';') + ';' + csvEscape(e.foreign || '', ';') + ';' + csvEscape(e.huSentence || '', ';') + ';' + csvEscape(e.fxSentence || '', ';'));
+    const csv = rows.join('\r\n');
+    let filename = prompt('Fájlnév:', 'memoria-' + selectedLang);
+    if(filename === null) return;
+    filename = filename.trim() || ('memoria-' + selectedLang);
+    if(!/\.csv$/i.test(filename)) filename += '.csv';
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  async function processMemoryImportFile(file){
+    const text = await readCsvText(file);
+    const lines = text.split(/\r?\n/).filter(l => l.trim().length);
+    const delim = detectDelimiter(lines);
+    let startIdx = 0;
+    if(lines.length && /^magyar\s*[;,]/i.test(lines[0])) startIdx = 1;
+    for(let i = startIdx; i < lines.length; i++){
+      const row = parseCsvLine(lines[i], delim);
+      if(row.length < 2) continue;
+      const hu = (row[0] || '').trim();
+      const foreign = (row[1] || '').trim();
+      const huSentence = (row[2] || '').trim();
+      const fxSentence = (row[3] || '').trim();
+      if(!hu && !foreign && !huSentence && !fxSentence) continue;
+      // Find an existing entry to update instead of adding a duplicate.
+      // Word rows are keyed by the Hungarian word; sentence-only rows by the sentence.
+      let existing = null;
+      if(hu){
+        existing = memoryEntries.find(e => e.lang === selectedLang && norm(e.hu) === norm(hu));
+      } else if(foreign){
+        existing = memoryEntries.find(e => e.lang === selectedLang && norm(e.foreign) === norm(foreign));
+      } else if(fxSentence){
+        existing = memoryEntries.find(e => e.lang === selectedLang && norm(e.fxSentence) === norm(fxSentence));
+      } else if(huSentence){
+        existing = memoryEntries.find(e => e.lang === selectedLang && norm(e.huSentence) === norm(huSentence));
+      }
+      if(existing){
+        existing.hu = hu || existing.hu;
+        existing.foreign = foreign || existing.foreign;
+        existing.huSentence = huSentence || existing.huSentence;
+        existing.fxSentence = fxSentence || existing.fxSentence;
+        existing.updatedAt = Date.now();
+      } else {
+        memoryEntries.push({ id: makeId(), hu, foreign, huSentence, fxSentence, lang: selectedLang, updatedAt: Date.now() });
+      }
+    }
+    saveMemoryToDisk();
+    renderMemoryTable();
+  }
+
+  function renderHistory(){
+    const visible = getVisibleEntries();
+    dictCount.textContent = visible.length + ' szó';
+    historyList.innerHTML = '';
+    if(!visible.length){
+      historyList.innerHTML = '<div class="empty-state">Még nincs elmentett szavad ezen a nyelven.</div>';
+      return;
+    }
+    if(selectedIndex >= visible.length) selectedIndex = 0;
+    visible.forEach((entry, index) => {
+      if(index > 0 && index % 5 === 0){
+        const divider = document.createElement('div');
+        divider.className = 'group-divider';
+        historyList.appendChild(divider);
+      }
+      const row = document.createElement('div');
+      const isPlaybackSelected = !addMemMode && !deleteMode && index === selectedIndex;
+      const isMemSelected = addMemMode && addMemSelectedIds.has(entry.id);
+      const isDeleteSelected = deleteMode && deleteSelectedIds.has(entry.id);
+      row.className = 'hist-item' + (isPlaybackSelected || isMemSelected || isDeleteSelected ? ' selected' : '');
+      row.dataset.id = entry.id;
+      row.innerHTML = `
+        <div class="hist-hu">${escapeHtml(huOf(entry))}</div>
+        <div class="hist-fx">${escapeHtml(fxOf(entry))}</div>
+      `;
+      row.addEventListener('click', () => {
+        if(deleteMode){
+          if(deleteSelectedIds.has(entry.id)){
+            deleteSelectedIds.delete(entry.id);
+            row.classList.remove('selected');
+          } else {
+            deleteSelectedIds.add(entry.id);
+            row.classList.add('selected');
+          }
+          return;
+        }
+        if(addMemMode){
+          if(addMemSelectedIds.has(entry.id)){
+            addMemSelectedIds.delete(entry.id);
+            row.classList.remove('selected');
+          } else {
+            addMemSelectedIds.add(entry.id);
+            row.classList.add('selected');
+          }
+          return;
+        }
+        selectedIndex = index;
+        renderHistory();
+        showResult(huOf(entry), fxOf(entry), true, entry.lang, entry.id);
+      });
+      historyList.appendChild(row);
+    });
+  }
+
+  deleteModeBtn.addEventListener('click', () => {
+    if(!deleteMode){
+      deleteMode = true;
+      deleteSelectedIds.clear();
+      if(addMemMode){ addMemMode = false; addMemSelectedIds.clear(); addMemBtn.classList.remove('active'); }
+      deleteModeBtn.classList.add('active');
+      allSelectBtn.style.display = 'flex';
+      renderHistory();
+      return;
+    }
+    const toDelete = entries.filter(e => deleteSelectedIds.has(e.id));
+    if(toDelete.length){
+      entries = entries.filter(e => !deleteSelectedIds.has(e.id));
+      saveDictionaryToDisk();
+    }
+    deleteMode = false;
+    deleteSelectedIds.clear();
+    deleteModeBtn.classList.remove('active');
+    allSelectBtn.style.display = 'none';
+    renderHistory();
+  });
+
+  addMemBtn.addEventListener('click', () => {
+    if(!addMemMode){
+      addMemMode = true;
+      addMemSelectedIds.clear();
+      if(deleteMode){ deleteMode = false; deleteSelectedIds.clear(); deleteModeBtn.classList.remove('active'); }
+      addMemBtn.classList.add('active');
+      allSelectBtn.style.display = 'flex';
+      renderHistory();
+      return;
+    }
+    const toAdd = entries.filter(e => addMemSelectedIds.has(e.id));
+    toAdd.forEach(en => {
+      const hu = huOf(en);
+      const foreign = fxOf(en);
+      const existingMem = memoryEntries.find(e => norm(huOf(e)) === norm(hu) && e.lang === en.lang);
+      if(existingMem){
+        setFx(existingMem, foreign);
+        existingMem.updatedAt = Date.now();
+      } else {
+        memoryEntries.push({ id: makeId(), hu, foreign, huSentence: '', fxSentence: '', lang: en.lang, updatedAt: Date.now() });
+      }
+    });
+    if(toAdd.length) saveMemoryToDisk();
+    addMemMode = false;
+    addMemSelectedIds.clear();
+    addMemBtn.classList.remove('active');
+    allSelectBtn.style.display = 'none';
+    renderHistory();
+  });
+
+  allSelectBtn.addEventListener('click', () => {
+    const visible = getVisibleEntries();
+    if(deleteMode){
+      const allSelected = visible.length > 0 && visible.every(e => deleteSelectedIds.has(e.id));
+      if(allSelected) visible.forEach(e => deleteSelectedIds.delete(e.id));
+      else visible.forEach(e => deleteSelectedIds.add(e.id));
+      renderHistory();
+    } else if(addMemMode){
+      const allSelected = visible.length > 0 && visible.every(e => addMemSelectedIds.has(e.id));
+      if(allSelected) visible.forEach(e => addMemSelectedIds.delete(e.id));
+      else visible.forEach(e => addMemSelectedIds.add(e.id));
+      renderHistory();
+    }
+  });
+
+  // --- language flag cycle ---
+  const LANG_ORDER = ['en', 'es', 'de'];
+  langFlagBtn.addEventListener('click', () => {
+    const idx = LANG_ORDER.indexOf(selectedLang);
+    selectedLang = LANG_ORDER[(idx + 1) % LANG_ORDER.length];
+    langFlagBtn.textContent = LANGS[selectedLang].flag;
+    langFlagBtn.dataset.lang = selectedLang;
+    selectedIndex = 0;
+    updatePlayButtonLabels();
+    renderHistory();
+  });
+
+  // --- export / import ---
+  function csvEscape(s, delim){
+    const specials = new RegExp('["' + delim + '\\n]');
+    if(specials.test(s)) return '"' + s.replace(/"/g,'""') + '"';
+    return s;
+  }
+  function parseCsvLine(line, delim){
+    const result = [];
+    let cur = ''; let inQuotes = false;
+    for(let i=0;i<line.length;i++){
+      const c = line[i];
+      if(inQuotes){
+        if(c === '"'){ if(line[i+1] === '"'){ cur += '"'; i++; } else inQuotes = false; }
+        else cur += c;
+      } else {
+        if(c === '"') inQuotes = true;
+        else if(c === delim){ result.push(cur); cur = ''; }
+        else cur += c;
+      }
+    }
+    result.push(cur);
+    return result;
+  }
+  function detectDelimiter(lines){
+    const sample = lines.slice(0, 5).join('\n');
+    const semi = (sample.match(/;/g) || []).length;
+    const comma = (sample.match(/,/g) || []).length;
+    return semi >= comma ? ';' : ',';
+  }
+
+  function pickCsvFile(onFile){
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.csv,text/csv';
+    input.style.position = 'fixed';
+    input.style.top = '-1000px';
+    input.style.opacity = '0';
+    document.body.appendChild(input);
+    let handled = false;
+    input.addEventListener('change', () => {
+      handled = true;
+      const file = input.files && input.files[0];
+      if(file) onFile(file);
+      if(input.parentNode) input.parentNode.removeChild(input);
+    });
+    window.addEventListener('focus', function cleanup(){
+      window.removeEventListener('focus', cleanup);
+      setTimeout(() => {
+        if(!handled && input.parentNode) input.parentNode.removeChild(input);
+      }, 1000);
+    }, { once: true });
+    input.click();
+  }
+
+  async function readCsvText(file){
+    const buf = await file.arrayBuffer();
+    const bytes = new Uint8Array(buf);
+    let text = '';
+    try{
+      if(bytes[0] === 0xFF && bytes[1] === 0xFE){
+        text = new TextDecoder('utf-16le').decode(bytes);
+      } else if(bytes[0] === 0xFE && bytes[1] === 0xFF){
+        text = new TextDecoder('utf-16be').decode(bytes);
+      } else {
+        text = new TextDecoder('utf-8').decode(bytes);
+      }
+    }catch(e){ text = ''; }
+    return text.replace(/^\uFEFF/, '');
+  }
+
+  menuBtn.addEventListener('click', () => { menuPanel.classList.toggle('show'); });
+  document.addEventListener('click', (e) => {
+    if(!menuPanel.contains(e.target) && e.target !== menuBtn){ menuPanel.classList.remove('show'); }
+  });
+
+  // --- result display ---
+  function showResult(hu, foreign, sourceIsHu, langCode, sourceId){
+    resultCard.classList.add('show');
+    currentForeignText = foreign;
+    currentForeignLang = langCode;
+    currentSourceIsHu = sourceIsHu;
+    const langInfo = LANGS[langCode] || LANGS.en;
+    if(sourceIsHu){
+      tag1.className = 'lang-tag hu'; tag1.textContent = 'HU';
+      tag2.className = 'lang-tag fx'; tag2.textContent = langInfo.tag;
+      origText.textContent = hu; transText.textContent = foreign;
+      lastTarget = { text: foreign, lang: langInfo.tts };
+    } else {
+      tag1.className = 'lang-tag fx'; tag1.textContent = langInfo.tag;
+      tag2.className = 'lang-tag hu'; tag2.textContent = 'HU';
+      origText.textContent = foreign; transText.textContent = hu;
+      lastTarget = { text: hu, lang: 'hu-HU' };
+    }
+    pendingEntry = { hu, foreign, lang: langCode };
+    pendingSourceId = sourceId || null;
+    updateTranslateBtnLabel();
+    savedOrigText = origText.textContent;
+    savedTransText = transText.textContent;
+    if(exampleModeActive){
+      const ex = applyExampleToCard();
+      if(ex){
+        updateTranslateBtnLabel();
+        return speakAsync(ex.text, ex.lang);
+      }
+    }
+    return speakAsync(lastTarget.text, lastTarget.lang);
+  }
+
+  function syncEditsFromCard(){
+    const huText = currentSourceIsHu ? origText.textContent.trim() : transText.textContent.trim();
+    const fxText = currentSourceIsHu ? transText.textContent.trim() : origText.textContent.trim();
+    currentForeignText = fxText;
+    if(pendingEntry){
+      pendingEntry.hu = huText;
+      pendingEntry.foreign = fxText;
+    }
+    const langInfo = LANGS[currentForeignLang] || LANGS.en;
+    lastTarget = currentSourceIsHu ? { text: fxText, lang: langInfo.tts } : { text: huText, lang: 'hu-HU' };
+    updateTranslateBtnLabel();
+  }
+  function updateTranslateBtnLabel(){
+    const huVal = origText.textContent.trim();
+    const fxVal = transText.textContent.trim();
+    translateBtn.textContent = (huVal && fxVal) ? 'Törlés' : 'Fordítás';
+  }
+  origText.addEventListener('input', syncEditsFromCard);
+  transText.addEventListener('input', syncEditsFromCard);
+
+  function speak(text, lang){
+    try{
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = lang; u.rate = 0.95;
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+  function speakAsync(text, lang){
+    return new Promise((resolve) => {
+      let done = false;
+      const finish = () => { if(done) return; done = true; clearTimeout(guard); resolve(); };
+      // Safety net: some mobile browsers occasionally never fire onend/onerror,
+      // which would otherwise leave this promise (and its awaiter) hanging forever.
+      const guard = setTimeout(finish, Math.max(5000, String(text).length * 150));
+      try{
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang = lang; u.rate = 0.95;
+        u.onend = finish; u.onerror = finish;
+        window.speechSynthesis.speak(u);
+      }catch(e){ finish(); }
+    });
+  }
+  function wait(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+  speakBtn.addEventListener('click', () => {
+    if(exampleModeActive && exampleFxSentence){
+      speak(exampleFxSentence, exampleFxLang);
+      return;
+    }
+    if(lastTarget) speak(lastTarget.text, lastTarget.lang);
+  });
+
+  function findExampleInMemory(word, lang){
+    if(!word) return null;
+    const n = norm(word);
+    if(!n) return null;
+    return memoryEntries.find(e => {
+      if(e.lang !== lang) return false;
+      if(!isMemorySentenceEntry(e)) return false;
+      return norm(e.hu) === n || norm(e.foreign) === n;
+    });
+  }
+
+  function flashBtnRed(btn){
+    btn.classList.add('flash-red');
+    setTimeout(() => btn.classList.remove('flash-red'), 500);
+  }
+  function flashExampleBtnRed(){ flashBtnRed(exampleBtn); }
+
+  function applyExampleToCard(){
+    const hit = findExampleInMemory(currentForeignText, currentForeignLang);
+    if(!hit) return null;
+    const langInfo = LANGS[currentForeignLang] || LANGS.en;
+    const fxSentence = hit.fxSentence;
+    const huSentence = hit.huSentence;
+    savedOrigText = origText.textContent;
+    savedTransText = transText.textContent;
+    if(tag1.textContent === 'HU'){
+      origText.textContent = huSentence;
+      transText.textContent = fxSentence;
+    } else {
+      origText.textContent = fxSentence;
+      transText.textContent = huSentence;
+    }
+    exampleFxSentence = fxSentence;
+    exampleFxLang = langInfo.tts;
+    return { text: fxSentence, lang: langInfo.tts };
+  }
+
+  exampleBtn.addEventListener('click', () => {
+    if(exampleModeActive){
+      origText.textContent = savedOrigText;
+      transText.textContent = savedTransText;
+      exampleModeActive = false;
+      exampleBtn.classList.remove('active');
+      updateTranslateBtnLabel();
+      if(lastTarget) speak(lastTarget.text, lastTarget.lang);
+      return;
+    }
+    if(!currentForeignText){
+      flashExampleBtnRed();
+      return;
+    }
+    const ex = applyExampleToCard();
+    if(!ex){
+      flashExampleBtnRed();
+      return;
+    }
+    exampleModeActive = true;
+    exampleBtn.classList.add('active');
+    updateTranslateBtnLabel();
+    speak(ex.text, ex.lang);
+  });
+
+  const VE_PALETTE = ['#ff6b6b', '#ffd166', '#4ecdc4', '#a78bfa', '#ff8fab', '#6bd47a', '#5aa9ff', '#f4a261'];
+
+  const VE_FONTS = ["'Fraunces', serif", "'Permanent Marker', cursive", "'Bangers', cursive"];
+
+  function buildVisualEffectBackground(){
+    visualEffectBgLayer.innerHTML = '';
+    const scene = Math.random();
+    if(scene < 0.4){
+      for(let i = 0; i < 18; i++){
+        const s = document.createElement('div');
+        s.className = 've-spark';
+        s.style.left = Math.random() * 100 + '%';
+        s.style.top = Math.random() * 100 + '%';
+        s.style.setProperty('--sc', VE_PALETTE[Math.floor(Math.random() * VE_PALETTE.length)]);
+        s.style.animationDelay = (Math.random() * 2) + 's';
+        const size = 4 + Math.random() * 7;
+        s.style.width = size + 'px';
+        s.style.height = size + 'px';
+        visualEffectBgLayer.appendChild(s);
+      }
+    } else if(scene < 0.75){
+      for(let i = 0; i < 6; i++){
+        const b = document.createElement('div');
+        b.className = 've-blob';
+        b.style.left = Math.random() * 85 + '%';
+        b.style.top = Math.random() * 85 + '%';
+        b.style.setProperty('--bc', VE_PALETTE[Math.floor(Math.random() * VE_PALETTE.length)]);
+        const size = 70 + Math.random() * 100;
+        b.style.width = size + 'px';
+        b.style.height = size + 'px';
+        b.style.animationDelay = (Math.random() * 3) + 's';
+        visualEffectBgLayer.appendChild(b);
+      }
+    }
+  }
+
+  function renderVisualEffect(){
+    const styles = ['ve-wave', 've-pulse', 've-spin', 've-handwrite', 've-paintbrush', 've-pour'];
+    const style = styles[Math.floor(Math.random() * styles.length)];
+    const casedWord = Math.random() < 0.5 ? currentForeignText.toUpperCase() : currentForeignText.toLowerCase();
+    visualEffectWord.className = 've-word ' + style;
+    visualEffectWord.style.fontSize = '';
+    visualEffectWord.style.fontFamily = VE_FONTS[Math.floor(Math.random() * VE_FONTS.length)];
+    visualEffectWord.innerHTML = '';
+    buildVisualEffectBackground();
+    const uniformColor = Math.random() < 0.4;
+    const sharedColor = VE_PALETTE[Math.floor(Math.random() * VE_PALETTE.length)];
+    let letterIndex = 0;
+    const words = casedWord.split(' ');
+    const wordUnits = [];
+    words.forEach((word, wi) => {
+      const unit = document.createElement('span');
+      unit.className = 've-word-unit';
+      Array.from(word).forEach((ch) => {
+        const span = document.createElement('span');
+        span.textContent = ch;
+        span.style.animationDelay = (letterIndex * 0.06) + 's';
+        span.style.setProperty('--d', (letterIndex * 0.06) + 's');
+        span.style.setProperty('--lc', uniformColor ? sharedColor : VE_PALETTE[Math.floor(Math.random() * VE_PALETTE.length)]);
+        letterIndex++;
+        unit.appendChild(span);
+      });
+      visualEffectWord.appendChild(unit);
+      wordUnits.push(unit);
+      if(wi < words.length - 1){
+        visualEffectWord.appendChild(document.createTextNode(' '));
+      }
+    });
+    visualEffectOverlay.classList.add('show');
+    const panel = document.querySelector('.visual-effect-panel');
+    let fontSize = 84;
+    visualEffectWord.style.fontSize = fontSize + 'px';
+    const maxWidth = panel ? panel.clientWidth : 380;
+    let widest = Math.max(...wordUnits.map(u => u.scrollWidth));
+    while(fontSize > 24 && widest > maxWidth){
+      fontSize -= 4;
+      visualEffectWord.style.fontSize = fontSize + 'px';
+      widest = Math.max(...wordUnits.map(u => u.scrollWidth));
+    }
+    const langInfo = LANGS[currentForeignLang] || LANGS.en;
+    speak(currentForeignText, langInfo.tts);
+  }
+
+  visualEffectBtn.addEventListener('click', () => {
+    if(exampleModeActive){
+      const list = getActiveEntries();
+      const i = exampleFxSentence
+        ? list.findIndex(e => norm(e.foreign) === norm(exampleFxSentence))
+        : -1;
+      const entry = list[i >= 0 ? i : 0];
+      if(!entry){
+        flashBtnRed(visualEffectBtn);
+        return;
+      }
+      veIndex = i >= 0 ? i : 0;
+      currentForeignText = entry.foreign;
+      currentForeignLang = entry.lang;
+      veCurrentHu = entry.hu;
+    } else {
+      if(!currentForeignText){
+        flashBtnRed(visualEffectBtn);
+        return;
+      }
+      veIndex = null;
+      veCurrentHu = currentSourceIsHu ? origText.textContent : transText.textContent;
+    }
+    visualEffectWord.style.transition = '';
+    visualEffectWord.style.transform = '';
+    visualEffectWord.style.opacity = '';
+    renderVisualEffect();
+  });
+  visualEffectCloseBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    visualEffectOverlay.classList.remove('show');
+  });
+  let veJustSwiped = false;
+  visualEffectOverlay.addEventListener('click', (e) => {
+    if(e.target === visualEffectCloseBtn || e.target === visualEffectHuBtn || e.target === visualEffectExampleBtn) return;
+    if(veJustSwiped) return;
+    visualEffectWord.style.transition = '';
+    visualEffectWord.style.transform = '';
+    visualEffectWord.style.opacity = '';
+    renderVisualEffect();
+  });
+
+  let veIndex = null;
+  let veCurrentHu = '';
+  function veGoToWord(step){
+    const visible = getActiveEntries();
+    if(!visible.length) return;
+    if(veIndex === null){
+      veIndex = (!exampleModeActive && selectedIndex >= 0 && selectedIndex < visible.length) ? selectedIndex : 0;
+    }
+    veIndex = ((veIndex + step) % visible.length + visible.length) % visible.length;
+    const entry = visible[veIndex];
+    currentForeignText = fxOf(entry);
+    currentForeignLang = entry.lang;
+    veCurrentHu = huOf(entry);
+    renderVisualEffect();
+  }
+
+  visualEffectHuBtn.addEventListener('mousedown', showVeHuReveal);
+  visualEffectHuBtn.addEventListener('touchstart', (e) => { e.preventDefault(); showVeHuReveal(); }, { passive: false });
+  visualEffectHuBtn.addEventListener('mouseup', hideVeHuReveal);
+  visualEffectHuBtn.addEventListener('mouseleave', hideVeHuReveal);
+  visualEffectHuBtn.addEventListener('touchend', hideVeHuReveal);
+  visualEffectHuBtn.addEventListener('touchcancel', hideVeHuReveal);
+  function showVeHuReveal(){
+    veHuReveal.textContent = veCurrentHu || '';
+    veHuReveal.classList.add('show');
+  }
+  function hideVeHuReveal(){
+    veHuReveal.classList.remove('show');
+  }
+
+  let veExampleHeld = false;
+  let veExampleSpeaking = false;
+  function maybeHideExampleReveal(){
+    if(!veExampleHeld && !veExampleSpeaking){
+      veHuReveal.classList.remove('show');
+    }
+  }
+  visualEffectExampleBtn.addEventListener('mousedown', () => { veExampleHeld = true; showVeExampleReveal(); });
+  visualEffectExampleBtn.addEventListener('touchstart', (e) => { e.preventDefault(); veExampleHeld = true; showVeExampleReveal(); }, { passive: false });
+  visualEffectExampleBtn.addEventListener('mouseup', () => { veExampleHeld = false; maybeHideExampleReveal(); });
+  visualEffectExampleBtn.addEventListener('mouseleave', () => { veExampleHeld = false; maybeHideExampleReveal(); });
+  visualEffectExampleBtn.addEventListener('touchend', () => { veExampleHeld = false; maybeHideExampleReveal(); });
+  visualEffectExampleBtn.addEventListener('touchcancel', () => { veExampleHeld = false; maybeHideExampleReveal(); });
+  function showVeExampleReveal(){
+    const hit = findExampleInMemory(currentForeignText, currentForeignLang);
+    if(!hit){
+      flashBtnRed(visualEffectExampleBtn);
+      return;
+    }
+    const fxSentence = hit.fxSentence;
+    const huSentence = hit.huSentence;
+    veHuReveal.innerHTML = '<div style="font-size:14px;font-weight:500;opacity:0.65;margin-bottom:6px;">' + escapeHtml(huSentence) + '</div>' + '<div style="font-size:26px;">' + escapeHtml(fxSentence) + '</div>';
+    veHuReveal.classList.add('show');
+    const langInfo = LANGS[currentForeignLang] || LANGS.en;
+    veExampleSpeaking = true;
+    speakAsync(fxSentence, langInfo.tts).then(() => {
+      veExampleSpeaking = false;
+      maybeHideExampleReveal();
+    });
+  }
+
+  let veDragging = false;
+  let veDragStartX = 0;
+  let veDragStartY = 0;
+
+  visualEffectOverlay.addEventListener('touchstart', (e) => {
+    if(e.target === visualEffectCloseBtn || e.target === visualEffectHuBtn || e.target === visualEffectExampleBtn) return;
+    veDragging = true;
+    veDragStartX = e.touches[0].clientX;
+    veDragStartY = e.touches[0].clientY;
+    visualEffectWord.style.transition = 'none';
+  }, { passive: true });
+
+  visualEffectOverlay.addEventListener('touchmove', (e) => {
+    if(!veDragging) return;
+    const dx = e.touches[0].clientX - veDragStartX;
+    const dy = e.touches[0].clientY - veDragStartY;
+    if(Math.abs(dx) > Math.abs(dy)){
+      visualEffectWord.style.transform = 'translateX(' + dx + 'px)';
+      visualEffectWord.style.opacity = String(Math.max(0.35, 1 - Math.abs(dx) / 300));
+    }
+  }, { passive: true });
+
+  visualEffectOverlay.addEventListener('touchend', (e) => {
+    if(!veDragging) return;
+    veDragging = false;
+    if(e.target === visualEffectCloseBtn || e.target === visualEffectHuBtn || e.target === visualEffectExampleBtn) return;
+    const dx = e.changedTouches[0].clientX - veDragStartX;
+    const dy = e.changedTouches[0].clientY - veDragStartY;
+    if(Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy) * 1.5){
+      veFinishSwipe(dx < 0 ? 1 : -1);
+    } else {
+      visualEffectWord.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+      visualEffectWord.style.transform = 'translateX(0)';
+      visualEffectWord.style.opacity = '1';
+    }
+  });
+
+  function veFinishSwipe(dir){
+    veJustSwiped = true;
+    setTimeout(() => { veJustSwiped = false; }, 400);
+    visualEffectWord.style.transition = 'transform 0.2s ease, opacity 0.2s ease';
+    visualEffectWord.style.transform = 'translateX(' + (dir * -320) + 'px)';
+    visualEffectWord.style.opacity = '0';
+    setTimeout(() => {
+      veGoToWord(dir);
+      visualEffectWord.style.transition = 'none';
+      visualEffectWord.style.transform = 'translateX(' + (dir * 320) + 'px)';
+      visualEffectWord.style.opacity = '0';
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          visualEffectWord.style.transition = 'transform 0.25s ease, opacity 0.25s ease';
+          visualEffectWord.style.transform = 'translateX(0)';
+          visualEffectWord.style.opacity = '1';
+        });
+      });
+    }, 200);
+  }
+
+  saveBtn.addEventListener('click', () => {
+    if(!pendingEntry){ flashBtnRed(saveBtn); return; }
+    let existing = null;
+    if(pendingSourceId){
+      existing = entries.find(e => e.id === pendingSourceId);
+    }
+    if(!existing){
+      existing = entries.find(e => norm(huOf(e)) === norm(pendingEntry.hu) && e.lang === pendingEntry.lang);
+    }
+    if(existing){
+      setHu(existing, pendingEntry.hu);
+      setFx(existing, pendingEntry.foreign);
+      existing.updatedAt = Date.now();
+      pendingSourceId = existing.id;
+      if(existing.sourceMemoryId){
+        const linkedMem = memoryEntries.find(e => e.id === existing.sourceMemoryId);
+        if(linkedMem){
+          setHu(linkedMem, pendingEntry.hu);
+          setFx(linkedMem, pendingEntry.foreign);
+          linkedMem.updatedAt = Date.now();
+          saveMemoryToDisk();
+        }
+      }
+    } else {
+      const created = { id: makeId(), hu: pendingEntry.hu, foreign: pendingEntry.foreign, lang: pendingEntry.lang, updatedAt: Date.now() };
+      entries.push(created);
+      pendingSourceId = created.id;
+    }
+    saveDictionaryToDisk();
+    renderHistory();
+  });
+
+  async function runPlayback(mode){
+    if(playingMode === mode){
+      stopPlayback = true;
+      try{ window.speechSynthesis.cancel(); }catch(e){}
+      return;
+    }
+    stopPlayback = true;
+    try{ window.speechSynthesis.cancel(); }catch(e){}
+    await wait(50); stopPlayback = false;
+    const group = getPlaybackEntries();
+    if(!group.length) return;
+    playingMode = mode;
+    playFxBtn.textContent = mode === 'fx' ? '■' : ('▶ ' + LANGS[selectedLang].tag);
+    playAllBtn.textContent = mode === 'fx-hu' ? '■' : (huFirst ? ('▶ HU+' + LANGS[selectedLang].tag) : ('▶ ' + LANGS[selectedLang].tag + '+HU'));
+    while(!stopPlayback){
+      for(const entry of group){
+        if(stopPlayback) break;
+        const langInfo = LANGS[entry.lang] || LANGS.en;
+        if(mode === 'fx-hu' && huFirst){
+          await speakAsync(huOf(entry), 'hu-HU');
+          if(stopPlayback) break;
+          await wait(250);
+          await speakAsync(fxOf(entry), langInfo.tts);
+          if(stopPlayback) break;
+        } else {
+          await speakAsync(fxOf(entry), langInfo.tts);
+          if(stopPlayback) break;
+          if(mode === 'fx-hu'){
+            await wait(250);
+            await speakAsync(huOf(entry), 'hu-HU');
+            if(stopPlayback) break;
+          }
+        }
+        await wait(350);
+      }
+    }
+    try{ window.speechSynthesis.cancel(); }catch(e){}
+    playingMode = null;
+    updatePlayButtonLabels();
+  }
+  orderBtn.addEventListener('click', () => {
+    huFirst = !huFirst;
+    orderBtn.classList.toggle('order-active', huFirst);
+    updatePlayButtonLabels();
+  });
+
+  playFxBtn.addEventListener('click', () => runPlayback('fx'));
+  playAllBtn.addEventListener('click', () => runPlayback('fx-hu'));
+
+  // --- language detection (heuristic) ---
+  const HU_WORDS = new Set(['a','az','és','vagy','de','hogy','nem','igen','én','te','ő','mi','ti','ők','ez','egy','van','vagyok','volt','lesz','kell','lehet','jó','rossz','nagy','kicsi','szeretlek','szia','köszönöm','kérem','hol','mikor','miért','hogyan','mennyi','ki','kicsoda','nagyon','is','csak','még','már','itt','ott']);
+  const EN_WORDS = new Set(['the','a','an','and','or','but','that','not','yes','no','i','you','he','she','we','they','it','this','is','are','was','were','will','can','could','good','bad','big','small','love','hello','thanks','please','where','when','why','how','much','who','what','very','just','still','here','there']);
+  const ES_WORDS = new Set(['el','la','los','las','y','o','pero','que','no','si','yo','tu','el','ella','nosotros','ellos','es','son','fue','sera','puede','bueno','malo','grande','pequeno','amor','hola','gracias','donde','cuando','como','cuanto','quien','muy','solo','todavia','aqui','alli']);
+  const DE_WORDS = new Set(['der','die','das','und','oder','aber','dass','nicht','ja','nein','ich','du','er','sie','wir','ihr','ist','sind','war','wird','kann','gut','schlecht','gross','klein','liebe','hallo','danke','bitte','wo','wann','warum','wie','wieviel','wer','was','sehr','nur','noch','hier','dort']);
+
+  function detectLanguage(text, targetCode){
+    const lower = text.toLowerCase();
+    if(/[őű]/.test(lower)) return 'hu';
+    if(targetCode === 'de' && /[äß]/.test(lower)) return 'de';
+    if(targetCode === 'es' && /[ñ¿¡]/.test(lower)) return 'es';
+    if(targetCode === 'en' && /[áéíóöúü]/.test(lower)) return 'hu';
+    const words = lower.split(/\s+/).map(w => w.replace(/[^a-zäöüßñáéíóú]/gi,''));
+    const targetSet = targetCode === 'en' ? EN_WORDS : targetCode === 'es' ? ES_WORDS : DE_WORDS;
+    let huScore = 0, targetScore = 0;
+    words.forEach(w => { if(HU_WORDS.has(w)) huScore++; if(targetSet.has(w)) targetScore++; });
+    return targetScore > huScore ? targetCode : 'hu';
+  }
+
+  async function translateGoogle(text, from, to){
+    const url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=" + from + "&tl=" + to + "&dt=t&q=" + encodeURIComponent(text);
+    const response = await fetch(url);
+    if(!response.ok) throw new Error('google failed');
+    const data = await response.json();
+    const segments = data && data[0];
+    if(!Array.isArray(segments)) throw new Error('no result');
+    let result = '';
+    segments.forEach(seg => { if(seg && seg[0]) result += seg[0]; });
+    result = result.trim();
+    if(!result) throw new Error('no result');
+    return result;
+  }
+
+  async function translateMyMemory(text, langpair){
+    const url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(text) + "&langpair=" + langpair;
+    const response = await fetch(url);
+    const data = await response.json();
+    const translated = data && data.responseData && data.responseData.translatedText;
+    if(!translated) throw new Error('no result');
+    return translated.trim();
+  }
+
+  async function translate(text, langpair){
+    const [from, to] = langpair.split('|');
+    try{
+      return await translateGoogle(text, from, to);
+    }catch(e){
+      return await translateMyMemory(text, langpair);
+    }
+  }
+
+  function showError(msg){ errorStatus.textContent = msg; errorStatus.classList.add('show'); }
+  function clearError(){ errorStatus.classList.remove('show'); }
+
+  async function handleUtterance(said, isQuestion){
+    said = said.trim();
+    if(!said) return;
+    if(isQuestion && !/[?？]\s*$/.test(said)){
+      said = said + '?';
+    }
+    clearError();
+    if(!isQuestion){
+      const existing = findEntry(said);
+      if(existing){
+        const hu = huOf(existing);
+        const foreign = fxOf(existing);
+        const isHu = norm(hu) === norm(said);
+        await showResult(hu, foreign, isHu ? true : false, existing.lang, existing.id);
+        return;
+      }
+      const memHit = findInMemory(said);
+      if(memHit){
+        const hu = huOf(memHit);
+        const foreign = fxOf(memHit);
+        const isHu = norm(hu) === norm(said);
+        await showResult(hu, foreign, isHu ? true : false, memHit.lang, null);
+        return;
+      }
+    }
+    const lang = detectLanguage(said, selectedLang);
+    try{
+      if(lang === 'hu'){
+        const foreign = await translate(said, 'hu|' + selectedLang);
+        await showResult(said, foreign, true, selectedLang, null);
+      } else {
+        const hu = await translate(said, selectedLang + '|hu');
+        await showResult(hu, said, false, selectedLang, null);
+      }
+    }catch(e){
+      showError('Hiba történt a fordítás közben.');
+    }
+  }
+
+  translateBtn.addEventListener('click', () => {
+    const huVal = origText.textContent.trim();
+    const fxVal = transText.textContent.trim();
+    if(huVal && fxVal){
+      origText.textContent = '';
+      transText.textContent = '';
+      const langInfo = LANGS[selectedLang] || LANGS.en;
+      tag1.textContent = 'HU'; tag1.className = 'lang-tag hu';
+      tag2.textContent = langInfo.tag; tag2.className = 'lang-tag fx';
+      pendingEntry = null;
+      pendingSourceId = null;
+      currentForeignText = '';
+      lastTarget = null;
+      updateTranslateBtnLabel();
+      return;
+    }
+    const typedText = huVal || fxVal;
+    if(!typedText){
+      flashBtnRed(translateBtn);
+      return;
+    }
+    handleUtterance(typedText, false);
+  });
+
+  // --- main speech recognition (hu-HU) ---
+  let recognition = null;
+  let listening = false;
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+
+  function startRecognition(){
+    if(!recognition || listening) return;
+    try{ recognition.start(); }catch(e){}
+  }
+
+  if(SR){
+    recognition = new SR();
+    recognition.lang = 'hu-HU';
+    recognition.interimResults = false;
+    recognition.maxAlternatives = 1;
+
+    recognition.onstart = () => { listening = true; micActiveControl.classList.add('listening'); clearError(); };
+    recognition.onend = () => {
+      listening = false;
+      micBtn.classList.remove('listening');
+      micQuestionBadge.classList.remove('listening');
+    };
+    recognition.onerror = (e) => {
+      listening = false;
+      micBtn.classList.remove('listening');
+      micQuestionBadge.classList.remove('listening');
+      if(e.error === 'not-allowed' || e.error === 'service-not-allowed'){
+        showError('Nincs mikrofon-hozzáférés — használd a szöveges mezőt lent.');
+        fallbackRow.style.display = 'flex';
+      } else if(e.error !== 'no-speech' && e.error !== 'aborted'){
+        showError('Nem sikerült felismerni — próbáld újra.');
+      }
+    };
+    let currentUtteranceIsQuestion = false;
+    let micActiveControl = micBtn;
+    recognition.onresult = (e) => {
+      if(!e.results || !e.results[0] || !e.results[0][0]) return;
+      handleUtterance(e.results[0][0].transcript, currentUtteranceIsQuestion);
+      currentUtteranceIsQuestion = false;
+    };
+
+    micBtn.addEventListener('click', () => {
+      if(listening){ recognition.stop(); return; }
+      currentUtteranceIsQuestion = false;
+      micActiveControl = micBtn;
+      startRecognition();
+    });
+    micQuestionBadge.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if(listening){ recognition.stop(); return; }
+      currentUtteranceIsQuestion = true;
+      micActiveControl = micQuestionBadge;
+      startRecognition();
+    });
+  } else {
+    showError('A böngésződ nem támogatja a hangfelismerést — használd a szöveges mezőt.');
+    fallbackRow.style.display = 'flex';
+    micBtn.style.opacity = '0.4';
+    micBtn.style.cursor = 'not-allowed';
+  }
+
+  // --- pronunciation check ---
+  textGo.addEventListener('click', () => {
+    const v = textInput.value;
+    if(v.trim()) handleUtterance(v, false);
+    textInput.value = '';
+  });
+  textInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') textGo.click(); });
+
+  // --- Practice mode ---
+  let practiceDirection = 'hu';
+  let practiceGroupIndex = 0;
+  let practiceWordIndex = 0;
+  let practiceGroupLength = 0;
+  let practiceCurrentCorrect = '';
+  let practiceCurrentLang = 'en';
+
+  function updatePracticeDirectionLabel(){
+    const tag = LANGS[selectedLang].tag;
+    practiceDirectionBtn.textContent = practiceDirection === 'hu' ? ('HU→' + tag) : (tag + '→HU');
+  }
+
+  function getActiveEntries(){
+    if(exampleModeActive){
+      return memoryEntries
+        .filter(e => e.lang === selectedLang && isMemorySentenceEntry(e))
+        .map(e => ({ id: e.id, hu: e.huSentence, foreign: e.fxSentence, lang: e.lang }));
+    }
+    return getVisibleEntries();
+  }
+
+  function openPractice(){
+    stopPlayback = true;
+    try{ window.speechSynthesis.cancel(); }catch(e){}
+    const visible = getActiveEntries();
+    let startIndex = 0;
+    if(exampleModeActive){
+      if(exampleFxSentence){
+        const i = visible.findIndex(e => norm(e.foreign) === norm(exampleFxSentence));
+        if(i >= 0) startIndex = i;
+      }
+    } else if(selectedIndex >= 0 && selectedIndex < visible.length){
+      startIndex = selectedIndex;
+    }
+    practiceGroupIndex = Math.floor(startIndex / 5);
+    practiceWordIndex = startIndex % 5;
+    practiceDrillView.style.display = 'block';
+    practiceOverlay.classList.add('show');
+    updatePracticeDirectionLabel();
+    renderPracticeWord();
+  }
+  function closePracticeOverlay(){
+    practiceOverlay.classList.remove('show');
+    if(practiceRecognitionListening) try{ practiceRecognition.stop(); }catch(e){}
+  }
+
+  function renderPracticeWord(){
+    const visible = getActiveEntries();
+    if(!visible.length){
+      practicePrompt.textContent = exampleModeActive
+        ? 'Nincs példamondatod ehhez a nyelvhez.'
+        : 'Nincs elmentett szavad ehhez a nyelvhez.';
+      practiceProgress.textContent = '';
+      practiceFeedback.textContent = '';
+      practiceInput.style.display = 'none';
+      practiceMicBtn.style.display = 'none';
+      return;
+    }
+    practiceInput.style.display = '';
+    practiceMicBtn.style.display = '';
+    const totalGroups = Math.ceil(visible.length / 5);
+    if(practiceGroupIndex >= totalGroups) practiceGroupIndex = 0;
+    const group = visible.slice(practiceGroupIndex * 5, practiceGroupIndex * 5 + 5);
+    practiceGroupLength = group.length;
+    const entry = group[practiceWordIndex % group.length];
+    const promptText = practiceDirection === 'hu' ? huOf(entry) : fxOf(entry);
+    practiceCurrentCorrect = practiceDirection === 'hu' ? fxOf(entry) : huOf(entry);
+    practiceCurrentLang = entry.lang;
+    practiceProgress.textContent = (practiceGroupIndex + 1) + '. csoport (' + totalGroups + ' közül) — ' + ((practiceWordIndex % group.length) + 1) + '/' + group.length;
+    practicePrompt.textContent = promptText;
+    practiceInput.value = '';
+    practiceFeedback.textContent = '';
+    practiceFeedback.className = 'practice-feedback';
+    practiceCheckBtn.classList.remove('flash-correct','flash-incorrect');
+    practiceInput.classList.remove('correct-bg');
+    if(document.activeElement !== practiceInput) practiceInput.focus();
+  }
+
+  function checkPracticeAnswer(){
+    const answer = practiceInput.value;
+    if(!answer || !answer.trim()) return;
+    const correct = norm(answer) === norm(practiceCurrentCorrect);
+    practiceCheckBtn.classList.remove('flash-correct','flash-incorrect');
+    void practiceCheckBtn.offsetWidth;
+    if(correct){
+      practiceFeedback.textContent = '✔ Helyes!';
+      practiceFeedback.className = 'practice-feedback correct';
+      practiceCheckBtn.classList.add('flash-correct');
+      practiceInput.classList.add('correct-bg');
+      const langInfo = LANGS[practiceCurrentLang] || LANGS.en;
+      const answerLang = practiceDirection === 'hu' ? langInfo.tts : 'hu-HU';
+      speak(practiceCurrentCorrect, answerLang);
+    } else {
+      practiceFeedback.textContent = '✘ Helyesen: ' + practiceCurrentCorrect;
+      practiceFeedback.className = 'practice-feedback incorrect';
+      practiceCheckBtn.classList.add('flash-incorrect');
+      practiceInput.classList.remove('correct-bg');
+    }
+  }
+
+  function goToNextPracticeWord(){
+    practiceWordIndex = (practiceWordIndex + 1) % (practiceGroupLength || 1);
+    renderPracticeWord();
+  }
+
+  practiceBtn.addEventListener('click', openPractice);
+  practiceCloseBtn.addEventListener('click', closePracticeOverlay);
+
+  practiceDirectionBtn.addEventListener('click', () => {
+    practiceDirection = practiceDirection === 'hu' ? 'fx' : 'hu';
+    updatePracticeDirectionLabel();
+    renderPracticeWord();
+  });
+
+  [practiceCheckBtn, practiceNextWordBtn, practiceNextGroupBtn, practiceMicBtn].forEach(btn => {
+    btn.addEventListener('mousedown', (e) => e.preventDefault());
+  });
+
+  practiceCheckBtn.addEventListener('click', checkPracticeAnswer);
+  practiceInput.addEventListener('keydown', (e) => {
+    if(e.key === 'Enter') checkPracticeAnswer();
+  });
+  practiceNextWordBtn.addEventListener('click', goToNextPracticeWord);
+
+  practiceNextGroupBtn.addEventListener('click', () => {
+    practiceGroupIndex++;
+    practiceWordIndex = 0;
+    renderPracticeWord();
+  });
+
+  let practiceRecognition = null;
+  let practiceRecognitionListening = false;
+  if(SR){
+    practiceRecognition = new SR();
+    practiceRecognition.interimResults = false;
+    practiceRecognition.maxAlternatives = 1;
+    practiceRecognition.onstart = () => {
+      practiceRecognitionListening = true;
+      practiceMicBtn.classList.add('listening-active');
+    };
+    practiceRecognition.onend = () => {
+      practiceRecognitionListening = false;
+      practiceMicBtn.classList.remove('listening-active');
+    };
+    practiceRecognition.onerror = (e) => {
+      practiceRecognitionListening = false;
+      practiceMicBtn.classList.remove('listening-active');
+      if(e.error && e.error !== 'aborted' && e.error !== 'no-speech'){
+        practiceFeedback.textContent = 'Mikrofonhiba: ' + e.error;
+        practiceFeedback.className = 'practice-feedback incorrect';
+      }
+    };
+    practiceRecognition.onresult = (e) => {
+      if(!e.results || !e.results[0] || !e.results[0][0]) return;
+      practiceInput.value = e.results[0][0].transcript;
+      checkPracticeAnswer();
+    };
+    practiceMicBtn.addEventListener('click', () => {
+      if(practiceRecognitionListening){ practiceRecognition.stop(); return; }
+      const langInfo = LANGS[practiceCurrentLang] || LANGS.en;
+      practiceRecognition.lang = practiceDirection === 'hu' ? langInfo.tts : 'hu-HU';
+      practiceFeedback.textContent = '🎤 Hallgatlak… (' + practiceRecognition.lang + ')';
+      practiceFeedback.className = 'practice-feedback';
+      if(listening) recognition.stop();
+      try{
+        practiceRecognition.start();
+      }catch(e){
+        practiceFeedback.textContent = 'Indítási hiba: ' + e.message;
+        practiceFeedback.className = 'practice-feedback incorrect';
+      }
+    });
+  } else {
+    practiceMicBtn.style.display = 'none';
+  }
+
+  updatePlayButtonLabels();
+  loadMemory();
+  loadDictionary();
+  loadTheme();
+})();
+</script>
+</body>
+</html>
