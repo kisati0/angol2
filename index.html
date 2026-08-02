@@ -149,12 +149,9 @@
     position: absolute;
     inset: 5px;
     border-radius: 50%;
-    border: 2px dashed rgba(91,143,217,0.78);
+    border: 1px solid rgba(91,143,217,0.78);
     pointer-events: none;
     transition: border-color 0.2s ease;
-  }
-  #micBtn.listening::before{
-    border-color: var(--green);
   }
   #micBtn:active{ transform: scale(0.96); }
   #micQuestionBadge{
@@ -166,7 +163,7 @@
     border-radius: 50%;
     background: var(--card);
     color: var(--ink);
-    border: 2px dashed rgba(91,143,217,0.78);
+    border: 1px solid rgba(91,143,217,0.78);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -176,21 +173,23 @@
     z-index: 2;
     transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
   }
-  #micQuestionBadge.listening{
-    background: var(--green);
-    border-color: var(--green);
-    color: #fff;
-  }
   #micQuestionBadge:active{ transform: scale(0.92); }
+  /* While recording the button keeps its own colours; only a green halo
+     spreads outwards from the ring. The two controls glow independently. */
   #micBtn.listening{
-    background: var(--green);
-    color: #fff;
-    animation: pulse 1.4s infinite;
+    box-shadow: 0 0 0 4px rgba(76,175,109,0.30),
+                0 0 22px 8px rgba(76,175,109,0.45),
+                0 8px 20px rgba(0,0,0,0.18);
+    animation: micGlow 1.4s ease-in-out infinite;
   }
-  @keyframes pulse{
-    0%{ box-shadow: 0 0 0 0 rgba(46,125,70,0.45); }
-    70%{ box-shadow: 0 0 0 22px rgba(46,125,70,0); }
-    100%{ box-shadow: 0 0 0 0 rgba(46,125,70,0); }
+  #micQuestionBadge.listening{
+    box-shadow: 0 0 0 3px rgba(76,175,109,0.30),
+                0 0 16px 6px rgba(76,175,109,0.5);
+    animation: micGlow 1.4s ease-in-out infinite;
+  }
+  @keyframes micGlow{
+    0%, 100%{ filter: brightness(1); }
+    50%{ filter: brightness(1.18); }
   }
   #micBtn svg{ width: 34px; height: 34px; }
 
@@ -279,7 +278,7 @@
     position: absolute;
     inset: 6px;
     border-radius: 13px;
-    border: 2px dashed rgba(91,143,217,0.6);
+    border: 1px solid rgba(91,143,217,0.6);
     pointer-events: none;
   }
   .lang-tag{
@@ -392,7 +391,7 @@
     -ms-overflow-style: none;
   }
   .history-list::-webkit-scrollbar{ width: 0; height: 0; }
-  .group-divider{ grid-column: 1 / -1; border-top: 2px dashed var(--line-strong); margin: 4px 0; }
+  .group-divider{ grid-column: 1 / -1; border-top: 1px solid var(--line-strong); margin: 4px 0; }
   .hist-item{
     background: var(--card);
     border: 1px solid var(--line);
@@ -418,7 +417,7 @@
     color: var(--ink-soft);
     text-align: center;
     padding: 18px 10px;
-    border: 1px dashed var(--line);
+    border: 1px solid var(--line);
     border-radius: 12px;
   }
   .memory-overlay{
@@ -465,7 +464,7 @@
     width: calc(100vw - 40px);
     max-width: 440px;
     padding: 10px 4px 12px;
-    border-top: 2px dashed rgba(91,143,217,0.6);
+    border-top: 1px solid rgba(91,143,217,0.6);
     background: var(--bg);
   }
   .find-results.show{ display: block; }
@@ -545,7 +544,7 @@
     background: rgba(91,143,217,0.1);
   }
   #memoryTable tr.block-end td{
-    border-bottom: 2px dashed rgba(91,143,217,0.78);
+    border-bottom: 1px solid rgba(91,143,217,0.78);
   }
   .memory-toolbar{
     display: flex;
@@ -733,7 +732,7 @@
     position: absolute;
     inset: 6px;
     border-radius: 13px;
-    border: 2px dashed rgba(91,143,217,0.6);
+    border: 1px solid rgba(91,143,217,0.6);
     pointer-events: none;
   }
   .practice-prompt{
@@ -909,7 +908,7 @@
     position: absolute;
     inset: 5px;
     border-radius: 13px;
-    border: 2px dashed rgba(91,143,217,0.6);
+    border: 1px solid rgba(91,143,217,0.6);
     pointer-events: none;
   }
   #veHuReveal.show{ display: block; }
@@ -1014,7 +1013,7 @@
     position: absolute;
     inset: 6px;
     border-radius: 13px;
-    border: 2px dashed rgba(91,143,217,0.6);
+    border: 1px solid rgba(91,143,217,0.6);
     pointer-events: none;
   }
   .link-title{
@@ -2710,7 +2709,7 @@
     try{ window.speechSynthesis.cancel(); }catch(e){}
 
     const inner = flashcard.querySelector('.flashcard-inner');
-    const DURATION = 520;
+    const DURATION = 400;
     const start = performance.now();
     let swapped = false;
     // The angle is stepped frame by frame instead of relying on a CSS
