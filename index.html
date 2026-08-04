@@ -4,11 +4,11 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
 <meta name="theme-color" content="#232323">
-<title>Szómondó 2</title>
+<title>Szómondó 1</title>
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="manifest" href="manifest.json">
-<meta name="apple-mobile-web-app-title" content="Szómondó 2">
+<meta name="apple-mobile-web-app-title" content="Szómondó 1">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,8 +18,8 @@
     --bg: #232323;
     --ink: #EDEAE4;
     --ink-soft: #A8A39A;
-    --paprika: #2F79E0;
-    --paprika-deep: #0E4CC1;
+    --paprika: #E0692F;
+    --paprika-deep: #C1440E;
     --teal: #3A8177;
     --gold: #D9A441;
     --green: #4CAF6D;
@@ -47,7 +47,6 @@
     width: 100%;
     max-width: 460px;
     height: 100%;
-    /* Keep clear of the camera cutout now that the app draws underneath it. */
     padding: calc(14px + var(--top-offset, 0px)) 18px calc(20px + var(--bottom-offset, 0px));
     display: flex;
     flex-direction: column;
@@ -136,7 +135,7 @@
   .theme-area-btn.on span{
     color: var(--paprika-deep);
     border-color: var(--paprika);
-    background: rgba(47,121,224,0.12);
+    background: rgba(224,105,47,0.12);
   }
   .menu-sep{
     height: 1px;
@@ -152,6 +151,53 @@
   .menu-panel .lang-option.active{
     background: var(--paprika);
     color: #fff;
+  }
+
+  .profile-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 10px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    transition: border-color 0.2s ease;
+  }
+  .profile-item.active {
+    border-color: var(--gold);
+    background: rgba(217, 164, 65, 0.05);
+  }
+  .profile-color-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    border: 1px solid rgba(255,255,255,0.15);
+  }
+  .profile-name {
+    font-size: 15px;
+    font-weight: 500;
+    flex: 1;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .profile-item .icon-btn {
+    padding: 4px 10px;
+    font-size: 12px;
+    height: 30px;
+    flex-shrink: 0;
+  }
+  .profile-item .icon-btn.select-btn {
+    background: var(--paprika);
+    border-color: var(--paprika);
+    color: #fff;
+  }
+  .profile-item .icon-btn.select-btn.active {
+    background: var(--neutral-bg);
+    border-color: var(--neutral-border);
+    color: var(--ink-soft);
   }
 
   .mic-row{
@@ -184,7 +230,7 @@
     position: absolute;
     inset: 5px;
     border-radius: 50%;
-    border: 1px solid rgba(47,121,224,0.78);
+    border: 1px solid rgba(224,105,47,0.78);
     pointer-events: none;
     transition: border-color 0.2s ease;
   }
@@ -198,7 +244,7 @@
     border-radius: 50%;
     background: var(--card);
     color: var(--ink);
-    border: 1px solid rgba(47,121,224,0.78);
+    border: 1px solid rgba(224,105,47,0.78);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -209,8 +255,6 @@
     transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
   }
   #micQuestionBadge:active{ transform: scale(0.92); }
-  /* While recording the button keeps its own colours; only a green halo
-     spreads outwards from the ring. The two controls glow independently. */
   #micBtn.listening{
     animation: micGlow 1.4s ease-in-out infinite;
   }
@@ -247,7 +291,7 @@
   .question-btn.active{
     border-color: var(--paprika);
     color: var(--paprika-deep);
-    background: rgba(47,121,224,0.12);
+    background: rgba(224,105,47,0.12);
     opacity: 1;
   }
   .question-btn.flash-red, .action-btn.flash-red, .icon-btn.flash-red{
@@ -315,7 +359,7 @@
     position: absolute;
     inset: 6px;
     border-radius: 13px;
-    border: 1px solid rgba(47,121,224,0.6);
+    border: 1px solid rgba(224,105,47,0.6);
     pointer-events: none;
   }
   .lang-tag{
@@ -343,7 +387,7 @@
     background: rgba(0,0,0,0.035);
     min-height: 1.3em;
   }
-  .orig-text:focus, .trans-text:focus{ background: rgba(47,121,224,0.06); box-shadow: 0 0 0 1px rgba(47,121,224,0.3); }
+  .orig-text:focus, .trans-text:focus{ background: rgba(224,105,47,0.06); box-shadow: 0 0 0 1px rgba(224,105,47,0.3); }
   .result-main{
     display: flex;
     gap: 10px;
@@ -379,7 +423,7 @@
   .action-btn.active{
     border-color: var(--paprika);
     color: var(--paprika-deep);
-    background: rgba(47,121,224,0.12);
+    background: rgba(224,105,47,0.12);
   }
   .action-btn.listening-active{ background: var(--neutral-bg); border-color: var(--neutral-border); color: var(--ink); }
   .icon-btn{
@@ -461,7 +505,7 @@
     text-align: center;
   }
   .hist-item:hover{ border-color: var(--paprika); }
-  .hist-item.selected{ border-color: var(--paprika); background: rgba(47,121,224,0.07); }
+  .hist-item.selected{ border-color: var(--paprika); background: rgba(224,105,47,0.07); }
   .hist-hu{ font-size: 10px; color: var(--ink-soft); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 100%; }
   .hist-fx{ font-size: 12px; font-weight: 600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width: 100%; }
   .empty-state{
@@ -505,7 +549,7 @@
   .find-hit{
     outline: 2px solid var(--paprika);
     outline-offset: -2px;
-    background: rgba(47,121,224,0.18) !important;
+    background: rgba(224,105,47,0.18) !important;
   }
   #memoryTable tr.find-inline td{
     padding: 0;
@@ -513,14 +557,12 @@
     border-left: none;
   }
   .find-results{
-    /* Sticky to the left edge so it stays visible however far the wide
-       table is scrolled sideways. */
     position: sticky;
     left: 0;
     width: calc(100vw - 40px);
     max-width: 440px;
     padding: 10px 4px 12px;
-    border-top: 1px solid rgba(47,121,224,0.6);
+    border-top: 1px solid rgba(224,105,47,0.6);
     background: var(--bg);
   }
   .find-results.show{ display: block; }
@@ -597,10 +639,10 @@
   }
   #memoryAllBtn{ width: auto; padding: 0 8px; font-weight: 700; }
   #memoryTable tr.selected td{
-    background: rgba(47,121,224,0.1);
+    background: rgba(224,105,47,0.1);
   }
   #memoryTable tr.block-end td{
-    border-bottom: 1px solid rgba(47,121,224,0.78);
+    border-bottom: 1px solid rgba(224,105,47,0.78);
   }
   .memory-toolbar{
     display: flex;
@@ -686,11 +728,11 @@
     border-left: 1px solid var(--line-strong);
   }
   #memoryTable td[contenteditable]:focus{
-    background: rgba(47,121,224,0.06);
-    box-shadow: 0 0 0 1px rgba(47,121,224,0.3);
+    background: rgba(224,105,47,0.06);
+    box-shadow: 0 0 0 1px rgba(224,105,47,0.3);
     border-radius: 6px;
   }
-  .memory-note-row td{ background: rgba(47,121,224,0.05); }
+  .memory-note-row td{ background: rgba(224,105,47,0.05); }
   .memory-note-text{
     font-style: italic;
     color: var(--ink-soft);
@@ -806,7 +848,7 @@
     position: absolute;
     inset: 6px;
     border-radius: 13px;
-    border: 1px solid rgba(47,121,224,0.6);
+    border: 1px solid rgba(224,105,47,0.6);
     pointer-events: none;
   }
   .practice-prompt{
@@ -837,8 +879,8 @@
   }
   .practice-answer-row input:focus{
     outline: none;
-    background: rgba(47,121,224,0.06);
-    box-shadow: 0 0 0 1px rgba(47,121,224,0.3);
+    background: rgba(224,105,47,0.06);
+    box-shadow: 0 0 0 1px rgba(224,105,47,0.3);
   }
   .practice-controls-row{
     display: flex;
@@ -871,7 +913,7 @@
     display: none;
     position: fixed;
     inset: 0;
-    background: linear-gradient(120deg, #0E4CC1, #D9A441, #1F4C46, #6a4fb3, #2e7d46, #0E4CC1);
+    background: linear-gradient(120deg, #C1440E, #D9A441, #1F4C46, #6a4fb3, #2e7d46, #C1440E);
     background-size: 300% 300%;
     animation: veBgShift 10s ease infinite;
     z-index: 110;
@@ -982,7 +1024,7 @@
     position: absolute;
     inset: 5px;
     border-radius: 13px;
-    border: 1px solid rgba(47,121,224,0.6);
+    border: 1px solid rgba(224,105,47,0.6);
     pointer-events: none;
   }
   #veHuReveal.show{ display: block; }
@@ -1088,7 +1130,7 @@
     position: absolute;
     inset: 6px;
     border-radius: 13px;
-    border: 1px solid rgba(47,121,224,0.6);
+    border: 1px solid rgba(224,105,47,0.6);
     pointer-events: none;
   }
   .link-title{
@@ -1115,8 +1157,8 @@
   }
   #linkInput:focus{
     outline: none;
-    background: rgba(47,121,224,0.06);
-    box-shadow: 0 0 0 1px rgba(47,121,224,0.3);
+    background: rgba(224,105,47,0.06);
+    box-shadow: 0 0 0 1px rgba(224,105,47,0.3);
   }
   .link-btn-row{
     position: relative;
@@ -1252,16 +1294,23 @@
     transition: opacity 0.2s ease;
   }
   #fcMuteBtn.muted{ opacity: 0.55; }
-  /* Splotchy theme background: ten soft colour blobs of varying size and
-     position, toggled from the menu. Applied to every screen that would
-     otherwise show a single flat --bg colour. */
-  /* Splotchy theme: the actual gradient is generated in JS (one of 10
-     presets, 2-3 colours each) and applied as inline background-image, so
-     every area can be toggled independently and reshuffles on each open. */
   .theme-splotch{
     background-color: var(--bg);
     background-repeat: no-repeat;
     background-attachment: fixed;
+  }
+
+  #profilOverlay .link-panel {
+    max-width: 420px;
+  }
+  #profileListContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: 300px;
+    overflow-y: auto;
+    position: relative;
+    z-index: 1;
   }
 </style>
 </head>
@@ -1274,6 +1323,7 @@
         <button class="icon-btn menu-btn-small" id="menuBtn" aria-label="Menü">⋯</button>
         <button class="icon-btn menu-btn-small" id="saveBtn" aria-label="Mentés">＋</button>
         <div class="menu-panel" id="menuPanel">
+          <button id="profileMenuItem">👤 Profilok</button>
           <button id="memoryOpenBtn">🧠 Memória</button>
           <button id="apiOpenBtn">🌐 Fordító API</button>
           <button id="marginOpenBtn">📏 Képernyő margó</button>
@@ -1476,11 +1526,261 @@
     </div>
   </div>
 
+  <!-- Profilok Overlay -->
+  <div class="link-overlay" id="profilOverlay">
+    <div class="link-panel">
+      <div class="link-title">Profilok kezelése</div>
+      <div id="profileListContainer">
+        <!-- A profilok listája ide fog kerülni -->
+      </div>
+      <div style="display: flex; gap: 8px; margin-top: 8px; position: relative; z-index: 1;">
+        <button class="icon-btn" id="addProfileBtn" style="flex: 1; justify-content: center; background: var(--teal); border-color: var(--teal); color: #fff;">＋ Új profil</button>
+        <button class="icon-btn" id="closeProfileBtn" style="flex: 0;">Bezár</button>
+      </div>
+    </div>
+  </div>
 
 </div>
 
 <script>
 (function(){
+  // --- Profil Manager ---
+  const PROFILES_STORAGE_KEY = 'hu-multi-profiles-v1';
+  const DEFAULT_PROFILE_NAME = 'Profil 1';
+  const PROFILE_COLORS = ['#E0692F', '#4A90E2', '#4CAF6D', '#A78BFA', '#FF8FAB'];
+  const MAX_PROFILES = 5;
+
+  let profilManager = {
+    profiles: [],
+    activeProfileName: DEFAULT_PROFILE_NAME,
+
+    loadProfiles() {
+      try {
+        const raw = localStorage.getItem(PROFILES_STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          this.profiles = parsed.profiles || [];
+          this.activeProfileName = parsed.activeProfileName || DEFAULT_PROFILE_NAME;
+        } else {
+          this.profiles = [{ name: DEFAULT_PROFILE_NAME, color: PROFILE_COLORS[0] }];
+          this.activeProfileName = DEFAULT_PROFILE_NAME;
+          this.saveProfiles();
+        }
+        if (!this.profiles.find(p => p.name === this.activeProfileName)) {
+          this.activeProfileName = this.profiles[0]?.name || DEFAULT_PROFILE_NAME;
+        }
+      } catch (e) {
+        this.profiles = [{ name: DEFAULT_PROFILE_NAME, color: PROFILE_COLORS[0] }];
+        this.activeProfileName = DEFAULT_PROFILE_NAME;
+      }
+    },
+
+    saveProfiles() {
+      try {
+        localStorage.setItem(PROFILES_STORAGE_KEY, JSON.stringify({
+          profiles: this.profiles,
+          activeProfileName: this.activeProfileName
+        }));
+      } catch (e) {
+        console.error('Failed to save profiles', e);
+        showError('Nem sikerült menteni a profilokat.');
+      }
+    },
+
+    getDataKey(baseKey) {
+      return `${baseKey}_${this.activeProfileName}`;
+    },
+
+    setActiveProfile(profileName) {
+      if (this.activeProfileName === profileName) return;
+      if (this.profiles.find(p => p.name === profileName)) {
+        this.activeProfileName = profileName;
+        this.saveProfiles();
+        this.loadDataForActiveProfile();
+      }
+    },
+
+    loadDataForActiveProfile() {
+      loadDictionary();
+      loadMemory();
+      renderHistory();
+      renderMemoryTable();
+      updatePlayButtonLabels();
+      renderProfileList();
+    },
+
+    addProfile(name) {
+      if (this.profiles.length >= MAX_PROFILES) {
+        showError('Maximum 5 profilt hozhatsz létre.');
+        return false;
+      }
+      const usedColors = this.profiles.map(p => p.color);
+      const availableColor = PROFILE_COLORS.find(c => !usedColors.includes(c));
+      if (!availableColor) {
+        showError('Nincs több szín elérhető.');
+        return false;
+      }
+      if (this.profiles.find(p => p.name === name)) {
+        showError('Már létezik ilyen nevű profil.');
+        return false;
+      }
+      this.profiles.push({ name, color: availableColor });
+      this.saveProfiles();
+      renderProfileList();
+      return true;
+    },
+
+    renameProfile(oldName, newName) {
+      if (oldName === newName) return true;
+      if (this.profiles.find(p => p.name === newName)) {
+        showError('Már létezik ilyen nevű profil.');
+        return false;
+      }
+      const profile = this.profiles.find(p => p.name === oldName);
+      if (!profile) return false;
+      profile.name = newName;
+      if (this.activeProfileName === oldName) {
+        this.activeProfileName = newName;
+      }
+      this.saveProfiles();
+      renderProfileList();
+      return true;
+    },
+
+    deleteProfile(profileName) {
+      if (this.profiles.length <= 1) {
+        showError('Nem törölheted az utolsó profilt.');
+        return;
+      }
+      if (profileName === DEFAULT_PROFILE_NAME) {
+        showError('Az alapértelmezett profilt nem törölheted.');
+        return;
+      }
+      this.profiles = this.profiles.filter(p => p.name !== profileName);
+      if (this.activeProfileName === profileName) {
+        this.activeProfileName = this.profiles[0]?.name || DEFAULT_PROFILE_NAME;
+      }
+      this.saveProfiles();
+      this.loadDataForActiveProfile();
+      renderProfileList();
+    }
+  };
+
+  // --- Profil UI ---
+  const profilOverlay = document.getElementById('profilOverlay');
+  const profileListContainer = document.getElementById('profileListContainer');
+  const addProfileBtn = document.getElementById('addProfileBtn');
+  const closeProfileBtn = document.getElementById('closeProfileBtn');
+
+  function renderProfileList() {
+    if (!profileListContainer) return;
+    profileListContainer.innerHTML = '';
+    const profiles = profilManager.profiles;
+    if (!profiles.length) {
+      profileListContainer.innerHTML = '<div style="text-align:center;color:var(--ink-soft);padding:20px 0;">Nincs elérhető profil.</div>';
+      return;
+    }
+    profiles.forEach((profile, index) => {
+      const isActive = profile.name === profilManager.activeProfileName;
+      const item = document.createElement('div');
+      item.className = `profile-item ${isActive ? 'active' : ''}`;
+
+      const dot = document.createElement('span');
+      dot.className = 'profile-color-dot';
+      dot.style.backgroundColor = profile.color;
+
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'profile-name';
+      nameSpan.textContent = profile.name;
+
+      const selectBtn = document.createElement('button');
+      selectBtn.className = `icon-btn select-btn ${isActive ? 'active' : ''}`;
+      selectBtn.textContent = isActive ? 'Aktív' : 'Kiválaszt';
+      selectBtn.addEventListener('click', () => {
+        if (!isActive) {
+          profilManager.setActiveProfile(profile.name);
+        }
+      });
+
+      const renameBtn = document.createElement('button');
+      renameBtn.className = 'icon-btn';
+      renameBtn.textContent = '✏️';
+      renameBtn.style.padding = '4px 8px';
+      renameBtn.style.fontSize = '14px';
+      renameBtn.addEventListener('click', () => {
+        const newName = prompt(`Add meg a profil új nevét (jelenleg: "${profile.name}"):`, profile.name);
+        if (newName && newName.trim() && newName.trim() !== profile.name) {
+          profilManager.renameProfile(profile.name, newName.trim());
+        }
+      });
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'icon-btn';
+      deleteBtn.textContent = '🗑️';
+      deleteBtn.style.padding = '4px 8px';
+      deleteBtn.style.fontSize = '14px';
+      deleteBtn.style.color = 'var(--red)';
+      if (profile.name === DEFAULT_PROFILE_NAME || profilManager.profiles.length <= 1) {
+        deleteBtn.style.opacity = '0.3';
+        deleteBtn.style.pointerEvents = 'none';
+      }
+      deleteBtn.addEventListener('click', () => {
+        if (confirm(`Biztosan törölni szeretnéd a "${profile.name}" profilt?`)) {
+          profilManager.deleteProfile(profile.name);
+        }
+      });
+
+      item.appendChild(dot);
+      item.appendChild(nameSpan);
+      const btnGroup = document.createElement('div');
+      btnGroup.style.display = 'flex';
+      btnGroup.style.gap = '4px';
+      btnGroup.appendChild(selectBtn);
+      btnGroup.appendChild(renameBtn);
+      btnGroup.appendChild(deleteBtn);
+      item.appendChild(btnGroup);
+
+      profileListContainer.appendChild(item);
+    });
+  }
+
+  // --- Profil Overlay eseménykezelők ---
+  function openProfileOverlay() {
+    renderProfileList();
+    profilOverlay.classList.add('show');
+  }
+
+  function closeProfileOverlay() {
+    profilOverlay.classList.remove('show');
+  }
+
+  addProfileBtn.addEventListener('click', () => {
+    const name = prompt('Add meg az új profil nevét:');
+    if (name && name.trim()) {
+      if (profilManager.addProfile(name.trim())) {
+        const newProfile = profilManager.profiles.find(p => p.name === name.trim());
+        if (newProfile) {
+          profilManager.setActiveProfile(newProfile.name);
+        }
+      }
+    }
+  });
+
+  closeProfileBtn.addEventListener('click', closeProfileOverlay);
+  profilOverlay.addEventListener('click', (e) => {
+    if (e.target === profilOverlay) closeProfileOverlay();
+  });
+
+  // --- Menü elem hozzáadása a profilokhoz ---
+  const profileMenuItem = document.getElementById('profileMenuItem');
+  if (profileMenuItem) {
+    profileMenuItem.addEventListener('click', () => {
+      menuPanel.classList.remove('show');
+      openProfileOverlay();
+    });
+  }
+
+  // --- A meglévő változók és függvények ---
   const micBtn = document.getElementById('micBtn');
   const micQuestionBadge = document.getElementById('micQuestionBadge');
   const menuBtn = document.getElementById('menuBtn');
@@ -1567,9 +1867,7 @@
   };
   let selectedLang = 'en';
 
-  const STORAGE_KEY = 'hu-multi-dictionary-v2-app';
-  const OLD_KEY = 'hu-multi-dictionary-v2-app-unused';
-  let entries = []; // {id, hu, foreign, lang, updatedAt}
+  let entries = [];
   let selectedIndex = 0;
   let pendingEntry = null;
   let pendingSourceId = null;
@@ -1584,29 +1882,30 @@
   let exampleFxLang = 'en-US';
   let exampleIndex = 0;
   let exampleTotal = 0;
-  let activeExampleEntry = null;   // the memory row behind the sentence on screen
+  let activeExampleEntry = null;
   let playingMode = null;
   let stopPlayback = false;
   let deleteMode = false;
   let deleteSelectedIds = new Set();
   let addMemMode = false;
   let addMemSelectedIds = new Set();
-  const MEMORY_KEY = 'hu-multi-memory-v2-app';
-  let memoryEntries = []; // {id, hu, foreign, lang, updatedAt}
+  let memoryEntries = [];
 
   function norm(s){ return String(s == null ? '' : s).trim().toLowerCase().replace(/[.,!?;:¿¡]+$/,'').replace(/^[¿¡]+/,''); }
   function makeId(){ return 'e' + Date.now() + Math.random().toString(36).slice(2,7); }
 
   function loadMemory(){
     try{
-      const raw = localStorage.getItem(MEMORY_KEY);
+      const key = profilManager.getDataKey('hu-multi-memory-v1');
+      const raw = localStorage.getItem(key);
       const parsed = raw ? JSON.parse(raw) : [];
       memoryEntries = Array.isArray(parsed) ? parsed : [];
     }catch(e){ memoryEntries = []; }
   }
   function saveMemoryToDisk(){
     try{
-      localStorage.setItem(MEMORY_KEY, JSON.stringify(memoryEntries));
+      const key = profilManager.getDataKey('hu-multi-memory-v1');
+      localStorage.setItem(key, JSON.stringify(memoryEntries));
     }catch(e){
       showError('Nem sikerült menteni — lehet, hogy betelt a tárhely.');
     }
@@ -1618,16 +1917,21 @@
 
   function loadDictionary(){
     try{
-      const raw = localStorage.getItem(STORAGE_KEY);
+      const key = profilManager.getDataKey('hu-multi-dictionary-v1');
+      const raw = localStorage.getItem(key);
       if(raw){
         const parsed = JSON.parse(raw);
         entries = Array.isArray(parsed) ? parsed : [];
       } else {
-        const oldRaw = localStorage.getItem(OLD_KEY);
+        const oldKey = 'hu-multi-dictionary-v1';
+        const oldRaw = localStorage.getItem(oldKey);
         if(oldRaw){
           const parsed = JSON.parse(oldRaw);
           const list = Array.isArray(parsed) ? parsed : Object.values(parsed);
           entries = list.map(v => ({ id: makeId(), hu: v.hu, foreign: v.en, lang: 'en', updatedAt: v.updatedAt || Date.now() }));
+          saveDictionaryToDisk();
+        } else {
+          entries = [];
         }
       }
     }catch(e){ entries = []; }
@@ -1635,7 +1939,8 @@
   }
   function saveDictionaryToDisk(){
     try{
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+      const key = profilManager.getDataKey('hu-multi-dictionary-v1');
+      localStorage.setItem(key, JSON.stringify(entries));
     }catch(e){
       showError('Nem sikerült menteni — lehet, hogy betelt a tárhely.');
     }
@@ -1671,19 +1976,16 @@
 
   let memorySelectMode = false;
   let memoryTrashMode = false;
-  let findMode = false;        // toggled by the language badge
-  let noteInsertMode = false;  // toggled by the note button; taps insert a comment row
-  let findTerm = '';           // the word currently being looked up
+  let findMode = false;
+  let findTerm = '';
+  let noteInsertMode = false;
 
-  // Match on whole words so "day" doesn't also hit "days off" style partials
-  // in the middle of another word (e.g. "everyday").
   function sentenceHasWord(sentence, word){
     if(!sentence || !word) return false;
     const parts = String(sentence).toLowerCase().split(/[^\p{L}\p{N}]+/u).filter(Boolean);
     return parts.includes(String(word).toLowerCase());
   }
 
-  // Builds the results block that is inserted right under the tapped word.
   function buildFindResults(){
     const findResults = document.createElement('div');
     findResults.className = 'find-results';
@@ -1712,7 +2014,6 @@
       txt.innerHTML = '<div class="fx">' + escapeHtml(entry.fxSentence || '') + '</div>' +
                       '<div class="hu">' + escapeHtml(entry.huSentence || '') + '</div>';
 
-      // The same link button as in the table, so words can be assigned right here.
       const linkBtn = document.createElement('button');
       linkBtn.className = 'memory-link';
       const cnt = (entry.linkedWordIds || []).length;
@@ -1816,14 +2117,12 @@
     const rows = visible.map((entry, index) => ({ entry, index }));
     memoryEmptyState.textContent = 'Még nincs semmi a memóriában ezen a nyelven.';
     memoryEmptyState.style.display = rows.length ? 'none' : 'block';
-    // The add-row button would sit awkwardly under the results list.
     memoryAddRowBtn.style.display = (findMode && findTerm) ? 'none' : '';
 
     let stopAfterThisRow = false;
     rows.forEach(({ entry, index }) => {
-      if(stopAfterThisRow) return;   // hide everything after the results block
+      if(stopAfterThisRow) return;
 
-      // A note row: unnumbered, undivided, just a free-text comment line.
       if(entry.isNote){
         const noteTr = document.createElement('tr');
         noteTr.dataset.id = entry.id;
@@ -1868,7 +2167,6 @@
       const tr = document.createElement('tr');
       tr.dataset.id = entry.id;
       if(memorySelectedIds.has(entry.id)) tr.classList.add('selected');
-      // Divider after every 20th row (but not after the very last one)
       if((index + 1) % 20 === 0 && index !== visible.length - 1){
         tr.classList.add('block-end');
       }
@@ -1886,7 +2184,6 @@
       fxTd.contentEditable = (memorySelectMode || findMode || noteInsertMode) ? 'false' : 'true';
       fxTd.textContent = entry.foreign || '';
 
-      // In find mode a tap on a word looks it up instead of editing it.
       if(findMode){
         [huTd, fxTd].forEach(cell => {
           const word = cell.textContent.trim();
@@ -1949,7 +2246,6 @@
           showMemoryNote('Ehhez a sorhoz nincs mondat.');
           return;
         }
-        // Show current links as row numbers so the user edits what they see.
         const currentNums = (entry.linkedWordIds || [])
           .map(id => visible.findIndex(v => v.id === id))
           .filter(i => i >= 0)
@@ -1962,7 +2258,6 @@
           const n = parseInt(part, 10);
           const target = (!isNaN(n) && n >= 1 && n <= visible.length) ? visible[n - 1] : null;
           if(!target || target.id === entry.id) bad.push(part);
-          // Store the stable id, not the position, so later reordering can't break it.
           else if(!ids.includes(target.id)) ids.push(target.id);
         });
         entry.linkedWordIds = ids;
@@ -2008,8 +2303,6 @@
       tr.appendChild(linkTd);
       memoryTableBody.appendChild(tr);
 
-      // In find mode the results sit directly beneath the chosen word, and the
-      // rows below are left out so the list has room.
       if(findMode && findTerm && isFindRow){
         const resTr = document.createElement('tr');
         resTr.className = 'find-inline';
@@ -2070,7 +2363,6 @@
     memoryEntries.push(created);
     saveMemoryToDisk();
     renderMemoryTable();
-    // Jump to the new row and put the cursor in its first cell.
     const newRow = memoryTableBody.querySelector('tr[data-id="' + created.id + '"]');
     if(newRow){
       try{ newRow.scrollIntoView({ block: 'center' }); }catch(e){}
@@ -2080,7 +2372,6 @@
   });
 
   memoryTrashBtn.addEventListener('click', () => {
-    // If rows are selected, the trash button performs the bulk delete.
     if(memorySelectedIds.size > 0){
       memoryEntries = memoryEntries.filter(e => !memorySelectedIds.has(e.id));
       memorySelectedIds.clear();
@@ -2091,7 +2382,6 @@
       renderMemoryTable();
       return;
     }
-    // Otherwise it just shows/hides the per-row delete buttons.
     memoryTrashMode = !memoryTrashMode;
     memoryTrashBtn.classList.toggle('active', memoryTrashMode);
     renderMemoryTable();
@@ -2139,8 +2429,6 @@
   memoryExportBtn.addEventListener('click', () => {
     const visible = memoryEntries.filter(e => e.lang === selectedLang);
     const rows = visible.map(e => {
-      // Links are stored as ids internally; export them as row numbers so the
-      // file stays human-readable and matches what's shown in the table.
       const nums = (e.linkedWordIds || [])
         .map(id => visible.findIndex(v => v.id === id))
         .filter(i => i >= 0)
@@ -2178,8 +2466,6 @@
       const fxSentence = (row[3] || '').trim();
       const linkNums = (row[4] || '').trim();
       if(!hu && !foreign && !huSentence && !fxSentence) continue;
-      // Find an existing entry to update instead of adding a duplicate.
-      // Word rows are keyed by the Hungarian word; sentence-only rows by the sentence.
       let existing = null;
       if(hu){
         existing = memoryEntries.find(e => e.lang === selectedLang && norm(e.hu) === norm(hu));
@@ -2204,7 +2490,6 @@
       }
       if(linkNums) pendingLinks.push({ target, nums: linkNums });
     }
-    // Resolve links only after every row exists, since a link may point forward.
     if(pendingLinks.length){
       const langRows = memoryEntries.filter(e => e.lang === selectedLang);
       pendingLinks.forEach(({ target, nums }) => {
@@ -2478,14 +2763,10 @@
   function syncEditsFromCard(){
     const huRaw = currentSourceIsHu ? origText.textContent.trim() : transText.textContent.trim();
     const fxRaw = currentSourceIsHu ? transText.textContent.trim() : origText.textContent.trim();
-    // The "(1/2)" style counter always sits on the Hungarian side — strip it
-    // before treating the text as real content.
     const huText = huRaw.replace(/\s*\(\d+\/\d+\)\s*$/, '');
     const fxText = fxRaw;
 
     if(exampleModeActive && activeExampleEntry){
-      // While a sentence is showing, edits belong to that memory sentence —
-      // never to the word itself.
       activeExampleEntry.huSentence = huText;
       activeExampleEntry.fxSentence = fxText;
       exampleFxSentence = fxText;
@@ -2512,7 +2793,6 @@
   origText.addEventListener('input', syncEditsFromCard);
   transText.addEventListener('input', syncEditsFromCard);
 
-  // Parenthetical asides (e.g. clarifying notes) are never read aloud.
   function stripParens(text){
     return String(text || '')
       .replace(/\([^)]*\)/g, ' ')
@@ -2535,8 +2815,6 @@
     return new Promise((resolve) => {
       let done = false;
       const finish = () => { if(done) return; done = true; clearTimeout(guard); resolve(); };
-      // Safety net: some mobile browsers occasionally never fire onend/onerror,
-      // which would otherwise leave this promise (and its awaiter) hanging forever.
       const guard = setTimeout(finish, Math.max(5000, clean.length * 150));
       try{
         window.speechSynthesis.cancel();
@@ -2561,16 +2839,13 @@
     if(!word) return [];
     const n = norm(word);
     if(!n) return [];
-    // The word entry itself (needed to match manual links by id)
     const wordEntry = memoryEntries.find(e =>
       e.lang === lang && (norm(e.hu) === n || norm(e.foreign) === n));
     const results = [];
     memoryEntries.forEach(e => {
       if(e.lang !== lang) return;
       if(!isMemorySentenceEntry(e)) return;
-      // Same row: the sentence sits next to this very word
       const sameRow = norm(e.hu) === n || norm(e.foreign) === n;
-      // Manual link: the user marked this word as appearing in that sentence
       const linked = wordEntry && (e.linkedWordIds || []).includes(wordEntry.id);
       if(sameRow || linked) results.push(e);
     });
@@ -2615,7 +2890,6 @@
 
   exampleBtn.addEventListener('click', () => {
     if(exampleModeActive){
-      // Advance to the next sentence; after the last one, return to the plain word.
       const next = exampleIndex + 1;
       if(next < exampleTotal){
         exampleIndex = next;
@@ -2737,7 +3011,6 @@
       flashBtnRed(visualEffectBtn);
       return;
     }
-    // Always mirror what the translator card is showing right now.
     if(exampleModeActive && exampleFxSentence){
       const list = getActiveEntries();
       const i = list.findIndex(e => norm(fxOf(e)) === norm(exampleFxSentence));
@@ -2773,9 +3046,9 @@
 
   // --- Flashcard ---
   let fcOpen = false;
-  let fcIndex = 0;          // position within the 5-word group
-  let fcShowingHu = false;  // false = foreign side, true = Hungarian side
-  let fcCards = [];         // the current group of up to 5 cards
+  let fcIndex = 0;
+  let fcShowingHu = false;
+  let fcCards = [];
 
   function buildFlashcards(){
     const visible = getVisibleEntries();
@@ -2783,7 +3056,6 @@
     const start = (selectedIndex >= 0 && selectedIndex < visible.length) ? selectedIndex : 0;
     const group = visible.slice(start, start + 5);
     return group.map(e => {
-      // While example mode is on, drill the sentence instead of the bare word.
       if(exampleModeActive){
         const hit = findExamplesInMemory(fxOf(e), e.lang)[0];
         if(hit) return { hu: hit.huSentence, fx: hit.fxSentence, lang: e.lang };
@@ -2792,8 +3064,6 @@
     });
   }
 
-  // Muting is remembered per language side, so you can silence just the
-  // Hungarian or just the foreign readings.
   let fcMuteHu = false, fcMuteFx = false;
   function fcUpdateMuteBtn(){
     const muted = fcShowingHu ? fcMuteHu : fcMuteFx;
@@ -2825,7 +3095,6 @@
     fcUpdateMuteBtn();
   });
 
-  // Tapping the backdrop (anywhere outside the card) repeats the reading.
   flashcardOverlay.addEventListener('click', (e) => {
     if(e.target === flashcardOverlay) speakCurrentCard();
   });
@@ -2835,7 +3104,7 @@
     if(!fcCards.length){ flashBtnRed(flashcardBtn); return; }
     reshuffleAreaTheme('flashcard');
     fcIndex = 0;
-    fcShowingHu = false;      // always start on the foreign side
+    fcShowingHu = false;
     fcOpen = true;
     flashcardOverlay.classList.add('show');
     flashcardBtn.classList.add('active');
@@ -2859,8 +3128,6 @@
     if(fcOpen) closeFlashcard(); else openFlashcard();
   });
 
-  // Drag handling mirrors the visual-effect overlay: the card follows the
-  // finger, then either snaps back or slides out.
   let fcDragging = false, fcStartX = 0, fcStartY = 0, fcMoved = false, fcAxis = null;
 
   flashcard.addEventListener('pointerdown', (e) => {
@@ -2899,7 +3166,7 @@
     flashcard.style.opacity = '0';
     setTimeout(() => {
       fcIndex = ((fcIndex + dir) % fcCards.length + fcCards.length) % fcCards.length;
-      fcShowingHu = false;               // each new card starts on the foreign side
+      fcShowingHu = false;
       renderFlashcard(true);
       flashcard.style.transition = 'none';
       flashcard.style.transform = 'translateX(' + (dir * 320) + 'px)';
@@ -2930,8 +3197,6 @@
     } else if(fcMoved){
       fcSnapBack();
     } else {
-      // Tapping near either edge spins the card on its axis, like flipping a
-      // physical card; a tap in the middle just swaps the side.
       const rect = flashcard.getBoundingClientRect();
       const edge = rect.width * 0.15;
       const xInCard = e.clientX - rect.left;
@@ -2948,16 +3213,12 @@
   function fcSpinFlip(dir){
     if(fcFlipping) return;
     fcFlipping = true;
-    // Silence the side we're leaving, so only the incoming one is read.
     try{ window.speechSynthesis.cancel(); }catch(e){}
 
     const inner = flashcard.querySelector('.flashcard-inner');
     const DURATION = 400;
     const start = performance.now();
     let swapped = false;
-    // The angle is stepped frame by frame instead of relying on a CSS
-    // transition, because the drag handler clears transitions on pointerdown
-    // and would otherwise freeze the turn.
     flashcard.style.transition = 'none';
 
     function frame(now){
@@ -2965,8 +3226,6 @@
       const eased = t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2;
       flashcard.style.transform = 'rotateY(' + (dir * 180 * eased) + 'deg)';
 
-      // Halfway, while the card is edge-on, swap the text and turn it back so
-      // it never reads mirrored.
       if(!swapped && eased >= 0.5){
         swapped = true;
         fcShowingHu = !fcShowingHu;
@@ -3121,8 +3380,6 @@
   }
 
   saveBtn.addEventListener('click', () => {
-    // While a sentence is on screen, Save commits it into Memory — the word
-    // in the Szótár is untouched.
     if(exampleModeActive && activeExampleEntry){
       activeExampleEntry.updatedAt = Date.now();
       saveMemoryToDisk();
@@ -3144,9 +3401,6 @@
       existing.updatedAt = Date.now();
       pendingSourceId = existing.id;
 
-      // Keep a matching Memory word entry in sync too — first via the explicit
-      // link (if this word came from Memory), otherwise by matching the word
-      // as it was before this edit.
       let linkedMem = existing.sourceMemoryId
         ? memoryEntries.find(e => e.id === existing.sourceMemoryId)
         : null;
@@ -3198,7 +3452,6 @@
 
   playFxBtn.addEventListener('click', () => runPlayback('fx'));
 
-  // --- language detection (heuristic) ---
   const HU_WORDS = new Set(['a','az','és','vagy','de','hogy','nem','igen','én','te','ő','mi','ti','ők','ez','egy','van','vagyok','volt','lesz','kell','lehet','jó','rossz','nagy','kicsi','szeretlek','szia','köszönöm','kérem','hol','mikor','miért','hogyan','mennyi','ki','kicsoda','nagyon','is','csak','még','már','itt','ott']);
   const EN_WORDS = new Set(['the','a','an','and','or','but','that','not','yes','no','i','you','he','she','we','they','it','this','is','are','was','were','will','can','could','good','bad','big','small','love','hello','thanks','please','where','when','why','how','much','who','what','very','just','still','here','there']);
   const ES_WORDS = new Set(['el','la','los','las','y','o','pero','que','no','si','yo','tu','el','ella','nosotros','ellos','es','son','fue','sera','puede','bueno','malo','grande','pequeno','amor','hola','gracias','donde','cuando','como','cuanto','quien','muy','solo','todavia','aqui','alli']);
@@ -3240,7 +3493,6 @@
     return translated.trim();
   }
 
-  // Lingva is an open front-end for Google Translate that allows browser calls.
   async function translateLingva(text, from, to){
     const url = 'https://lingva.ml/api/v1/' + from + '/' + to + '/' + encodeURIComponent(text);
     const r = await fetch(url);
@@ -3267,7 +3519,6 @@
 
   async function translate(text, langpair){
     const [from, to] = langpair.split('|');
-    // Try the chosen provider first, then fall back to the others.
     const chain = API_ORDER[activeApi] || API_ORDER.google;
     let lastErr = null;
     for(const name of chain){
@@ -3291,9 +3542,6 @@
     apiOverlay.classList.add('show');
   });
 
-  // --- Screen margins ---
-  // Fullscreen PWAs on phones with a camera cutout don't report a safe area,
-  // so the offset is adjustable by hand and remembered.
   const MARGIN_TOP_KEY = 'hu-multi-margin-top-v1';
   const MARGIN_BOTTOM_KEY = 'hu-multi-margin-bottom-v1';
   let topOffset = 0, bottomOffset = 0;
@@ -3321,9 +3569,6 @@
     }catch(e){}
 
     if(!hasStored){
-      // Installed fullscreen apps paint under the camera cutout, and the
-      // system reports no safe area there, so start with a sensible gap that
-      // can then be fine-tuned from the menu.
       let fullscreen = false;
       try{
         fullscreen = window.matchMedia('(display-mode: fullscreen)').matches;
@@ -3369,10 +3614,6 @@
     reshuffleAreaTheme('main');
   });
 
-  // --- Splotchy theme, toggled separately per screen ---
-  // Ten preset combinations, two or three soft colour blobs each — never all
-  // ten colours at once, matching the reference: a lot of dark background
-  // still shows through.
   const THEME_COLOURS = {
     orange:  '224,105,47',  blue:   '90,169,255', green:  '76,175,109',
     purple:  '167,139,250', gold:   '255,209,102', teal:   '46,125,158',
@@ -3419,9 +3660,6 @@
       el.style.backgroundRepeat = 'no-repeat';
     });
     if(area === 'main'){
-      // <body> is only as tall as the viewport, so on phones with a camera
-      // cutout it stops short of the very top. Painting on <html> covers the
-      // whole canvas — but only if <body> stops hiding it.
       document.body.style.backgroundColor = 'transparent';
     }
   }
@@ -3540,7 +3778,6 @@
     handleUtterance(typedText, false);
   });
 
-  // --- main speech recognition (hu-HU) ---
   let recognition = null;
   let listening = false;
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -3601,7 +3838,6 @@
     micBtn.style.cursor = 'not-allowed';
   }
 
-  // --- pronunciation check ---
   textGo.addEventListener('click', () => {
     const v = textInput.value;
     if(v.trim()) handleUtterance(v, false);
@@ -3609,7 +3845,6 @@
   });
   textInput.addEventListener('keydown', (e) => { if(e.key === 'Enter') textGo.click(); });
 
-  // --- Practice mode ---
   let practiceDirection = 'hu';
   let practiceGroupIndex = 0;
   let practiceWordIndex = 0;
@@ -3717,7 +3952,6 @@
     renderPracticeWord();
   }
 
-  // Tapping the prompt word reads out its translation (the expected answer).
   practicePrompt.addEventListener('click', () => {
     if(!practiceCurrentCorrect) return;
     const langInfo = LANGS[practiceCurrentLang] || LANGS.en;
@@ -3734,13 +3968,10 @@
     renderPracticeWord();
   });
 
-  // Keep the on-screen keyboard up: nothing inside the drill may steal focus
-  // from the answer field when tapped.
   [practiceCheckBtn, practiceNextWordBtn, practiceNextGroupBtn, practiceMicBtn,
    practicePrompt, practiceDirectionBtn].forEach(el => {
     el.addEventListener('mousedown', (e) => e.preventDefault());
     el.addEventListener('touchstart', (e) => {
-      // Prevent the default focus shift, but let the tap still register.
       if(e.cancelable) e.preventDefault();
     }, { passive: false });
     el.addEventListener('touchend', (e) => {
@@ -3808,9 +4039,13 @@
     practiceMicBtn.style.display = 'none';
   }
 
+  // Inicializálás
+  profilManager.loadProfiles();
+  profilManager.loadDataForActiveProfile();
+  renderProfileList();
   updatePlayButtonLabels();
-  loadMemory();
-  loadDictionary();
+  loadOffsets();
+  loadThemeSplotch();
 })();
 </script>
 <script>
