@@ -1,6 +1,6 @@
 // Minimal service worker: required by the browser for standalone install.
 // Caches the app shell so it also opens without a connection.
-const CACHE = 'szomondo-2-v12';
+const CACHE = 'szomondo-2-v1';
 const ASSETS = ['./', './index.html', './manifest.json',
                 './icon-192.png', './icon-512.png', './icon-maskable.png'];
 
