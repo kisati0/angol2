@@ -573,6 +573,9 @@
   .memory-book-grid{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; padding:8px 0; }
   .memory-chapter-card{ appearance:none; min-height:76px; border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--ink); cursor:pointer; padding:8px 5px; font-family:'Fraunces',serif; font-size:13px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; }
   .memory-chapter-card small{ font-family:'Work Sans',sans-serif; font-size:10px; color:var(--ink-soft); }
+  .memory-chapter-card.selected{ outline:2px solid var(--teal); background:rgba(31,76,70,.15); }
+  .memory-overlay.book-mode .memory-toolbar{ gap:3px; }
+  .memory-overlay.book-mode .memory-toolbar .mem-toolbar-btn{ flex:0 1 auto; padding:6px 5px; font-size:10px; }
   .memory-book-back{ margin:4px 0 8px; }
   #practiceNextGroupBtn.flash-white{
     box-shadow: 0 0 0 3px rgba(255,255,255,0.25), 0 0 16px 4px rgba(255,255,255,0.35);
@@ -1579,12 +1582,13 @@
   .ebook-reader-view.bar-top .ebook-bar.translation-long .ebook-bar-translation,
   .ebook-reader-view.bar-bottom .ebook-bar.translation-long .ebook-bar-translation{ left:0; right:148px; top:calc(5px + var(--ebook-translation-offset,0px)); bottom:auto !important; transform:none; padding:5px 12px 28px; }
   .ebook-reader-view .ebook-bar.translation-long .ebook-bar-translation{ border-radius:0 0 18px 0; background:radial-gradient(ellipse 165% 165% at 0 0,#1e1d1c 0%,#1e1d1c 42%,rgba(30,29,28,.58) 70%,rgba(30,29,28,0) 100%) !important; }
-  #ebookSaveBtn.saved{ animation:ebook-save-glow .42s ease; background:#2f8f6b; color:#fff; }
+  #ebookPlayBtn,#ebookSaveBtn{ width:42px; height:38px; border-radius:10px; background:var(--bg); color:var(--ink-soft); border:1px solid var(--line); font-size:17px; }
+  #ebookSaveBtn.saved{ animation:ebook-save-glow .42s ease; background:var(--bg); color:#2f8f6b; border-color:#2f8f6b; }
   #ebookBookmarkBtn{ background:transparent !important; color:#d5d5d5; border:none !important; border-radius:0; }
   #ebookBookmarkBtn.active{ background:transparent !important; color:#d5d5d5; }
   #ebookBookmarkBtn svg{ width:30px; height:34px; fill:transparent; stroke:currentColor; stroke-width:1.25; stroke-linejoin:round; }
   #ebookBookmarkBtn.active svg{ fill:#67baff; stroke:#d5d5d5; }
-  @keyframes ebook-save-glow{ 0%,100%{box-shadow:none} 45%{box-shadow:0 0 0 5px rgba(47,143,107,.42)} }
+  @keyframes ebook-save-glow{ 0%,100%{box-shadow:none} 45%{box-shadow:0 0 0 5px rgba(47,143,107,.42),inset 0 0 12px rgba(47,143,107,.25)} }
 </style>
 </head>
 <body>
@@ -2274,8 +2278,44 @@
       document.getElementById('memoryBookBackBtn').addEventListener('click',()=>{memoryBookChapter=null;renderMemoryBookView();}); return; }
     const keys=Object.keys(chapters).sort((a,b)=>Number(a)-Number(b));
     memoryBookView.innerHTML=keys.length?'<div class="memory-book-grid">'+keys.map(ch=>'<button class="memory-chapter-card" data-chapter="'+escapeHtml(ch)+'">'+escapeHtml('Fejezet '+ch)+'<small>'+chapters[ch].length+' mondat</small></button>').join('')+'</div>':'<div class="empty-state">Ehhez a könyvhöz még nincs feltöltött fejezetfordítás.</div>';
-    memoryBookView.querySelectorAll('[data-chapter]').forEach(btn=>btn.addEventListener('click',()=>{ const chapter=btn.dataset.chapter; if(memoryTrashMode){ const all=loadBookTranslations(),bookId=currentTranslationBookId(); if(all[bookId]){ delete all[bookId][chapter]; if(!Object.keys(all[bookId]).length) delete all[bookId]; saveBookTranslations(all); } renderMemoryBookView(); return; } memoryBookChapter=chapter;renderMemoryBookView(); }));
+    const rulesBtn=document.createElement('button'); rulesBtn.className='icon-btn'; rulesBtn.textContent='AI CSV-szabályok letöltése'; rulesBtn.addEventListener('click',()=>downloadBookCsvRules()); memoryBookView.appendChild(rulesBtn);
+    memoryBookView.querySelectorAll('[data-chapter]').forEach(btn=>{ const chapter=btn.dataset.chapter; btn.classList.toggle('selected',memorySelectedIds.has('chapter:'+chapter)); btn.addEventListener('click',()=>{ if(memorySelectMode){ const id='chapter:'+chapter; memorySelectedIds.has(id)?memorySelectedIds.delete(id):memorySelectedIds.add(id); renderMemoryBookView(); return; } if(memoryTrashMode){ const all=loadBookTranslations(),bookId=currentTranslationBookId(); if(all[bookId]){ delete all[bookId][chapter]; if(!Object.keys(all[bookId]).length) delete all[bookId]; saveBookTranslations(all); } renderMemoryBookView(); return; } memoryBookChapter=chapter;renderMemoryBookView(); }); });
   }
+  function downloadBookCsvRules(){ if(!confirm('Letöltöd az AI-nak szóló CSV-generálási szabályokat?'))return; const rules=`FEJEZETFORDÍTÓ CSV – AI SABLON
+
+FONTOS! Ne írj kommentárt vagy plusz információt. Az itt leírtak alapján készítsd el a .csv fájlt, és küldj egy letöltési linket a kész CSV-hez.
+
+Feladat: Fordítsd le az alább bemásolt könyvfejezetet magyarra, mondatonként.
+
+CSAK pontosvesszővel (;) tagolt CSV-t adj vissza. Ne írj magyarázatot, címet, Markdown-kódblokkot vagy más szöveget.
+
+Kötelező fejléc – pontosan ez legyen a válasz első sora:
+könyv_azonosító;fejezet;idegen_mondat;magyar_mondat;nyelv
+
+Kötelező szabályok:
+1. Egy CSV-sor pontosan egy teljes eredeti mondatot és annak teljes magyar fordítását tartalmazza.
+2. Az idegen_mondat mezőt változtatás nélkül másold át az eredeti szövegből, írásjelekkel együtt.
+3. A magyar_mondat természetes, teljes magyar fordítás legyen.
+4. Mind az öt oszlopot töltsd ki minden adatsorban.
+5. A mezőelválasztó mindig pontosvessző (;).
+6. Ha egy mező pontosvesszőt, idézőjelet vagy sortörést tartalmaz, tedd dupla idézőjelek közé.
+7. A mezőn belüli dupla idézőjelet két dupla idézőjellel írd.
+8. UTF-8-kompatibilis szöveget használj.
+9. Ne számozd a sorokat, ne hagyj üres sort, és ne adj hozzá további oszlopot.
+10. A könyv_azonosító, a fejezet és a nyelv értéke minden adatsorban azonos legyen.
+
+Helyes CSV-minta:
+könyv_azonosító;fejezet;idegen_mondat;magyar_mondat;nyelv
+kis-herceg;1;"Once when I was six years old I saw a magnificent picture in a book.";"Hatéves koromban egyszer egy csodálatos képet láttam egy könyvben.";en
+
+Könyv azonosítója: [IDE ÍRD A KÖNYV AZONOSÍTÓJÁT, PL. kis-herceg]
+Fejezet: [IDE ÍRD A FEJEZETET, PL. 1]
+Nyelv: [IDE ÍRD AZ EREDETI NYELV KÓDJÁT, PL. en]
+
+Fordítsd le a következő angol szöveget magyarra a lehető legpontosabban. Elsősorban az eredeti angol szöveg jelentését és összefüggéseit kövesd, ne szó szerint fordíts. A magyar szöveg legyen természetes, nyelvtanilag helyes és gördülékeny, de ne változtasd meg és ne egészítsd ki az eredeti jelentést. Ügyelj a többjelentésű szavakra, az állandó szókapcsolatokra, a névmásokra, az igeidőkre és a szövegkörnyezetre. A neveket és visszatérő kifejezéseket következetesen fordítsd. A fordítás elkészítése után ellenőrizd mondatonként, hogy semmi nem maradt ki, nem került bele jelentéstorzítás, és nincs benne szó szerinti, gépies megfogalmazás. Csak az ellenőrzött magyar fordítást add vissza.
+
+Fordítandó eredeti szöveg:
+`; const blob=new Blob([rules],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='Szabaly-konyv-fejezet-forditas.txt';a.click();URL.revokeObjectURL(url); }
   async function processBookTranslationImport(file){
     const text=await readCsvText(file); const lines=text.split(/\r?\n/).filter(x=>x.trim()); const delim=detectDelimiter(lines); const all=loadBookTranslations(); let imported=0, bookId='';
     for(let i=0;i<lines.length;i++){ const row=parseCsvLine(lines[i],delim); if(i===0&&String(row[0]).toLowerCase().includes('könyv'))continue; if(row.length<5)continue; const [book,chapter,foreign,hu,lang]=row.map(x=>String(x||'').trim()); if(!book||!chapter||!foreign||!hu||lang!==selectedLang)continue; bookId=book; all[book]||(all[book]={}); all[book][chapter]||(all[book][chapter]=[]); const rows=all[book][chapter]; const ex=rows.find(x=>norm(x.foreign)===norm(foreign)); if(ex)ex.hu=hu;else rows.push({foreign,hu}); imported++; }
@@ -2430,7 +2470,7 @@
     }
     renderMemoryTable();
   });
-  memoryBookBtn.addEventListener('click',()=>{ memoryBookMode=!memoryBookMode; memoryBookChapter=null; memoryBookBtn.classList.toggle('active',memoryBookMode); memoryLangTag.classList.toggle('find-on',false); renderMemoryTable(); });
+  memoryBookBtn.addEventListener('click',()=>{ memoryBookMode=!memoryBookMode; memoryBookChapter=null; memoryBookBtn.classList.toggle('active',memoryBookMode); memoryOverlay.classList.toggle('book-mode',memoryBookMode); memoryLangTag.classList.toggle('find-on',false); renderMemoryTable(); });
 
   const memoryNoteBtn = document.getElementById('memoryNoteBtn');
   memoryNoteBtn.addEventListener('click', () => {
@@ -2703,6 +2743,12 @@
   }
 
   memoryAddBtn.addEventListener('click', () => {
+    if(memoryBookMode){
+      if(!memorySelectMode){ memorySelectMode=true; memorySelectedIds.clear(); memoryAddBtn.classList.add('active'); memoryAllBtn.style.display='flex'; renderMemoryBookView(); return; }
+      const chapters=currentBookTranslations(); let added=0;
+      [...memorySelectedIds].filter(id=>id.startsWith('chapter:')).forEach(id=>{ const ch=id.slice(8); (chapters[ch]||[]).forEach(r=>{ if(!memoryEntries.some(e=>e.lang===selectedLang&&norm(e.fxSentence)===norm(r.foreign))){ memoryEntries.push({id:makeId(),hu:'',foreign:'',huSentence:r.hu,fxSentence:r.foreign,lang:selectedLang,updatedAt:Date.now()});added++; } }); });
+      if(added)saveMemoryToDisk(); memorySelectMode=false; memorySelectedIds.clear(); memoryAddBtn.classList.remove('active'); memoryAllBtn.style.display='none'; renderMemoryBookView(); return;
+    }
     if(!memorySelectMode){
       memorySelectMode = true;
       memorySelectedIds.clear();
@@ -2737,6 +2783,7 @@
   });
 
   memoryAllBtn.addEventListener('click', () => {
+    if(memoryBookMode){ const keys=Object.keys(currentBookTranslations()).map(ch=>'chapter:'+ch); const all=keys.length&&keys.every(id=>memorySelectedIds.has(id)); keys.forEach(id=>all?memorySelectedIds.delete(id):memorySelectedIds.add(id)); renderMemoryBookView(); return; }
     const visible = getVisibleMemoryEntries();
     const allSelected = visible.length > 0 && visible.every(e => memorySelectedIds.has(e.id));
     if(allSelected) visible.forEach(e => memorySelectedIds.delete(e.id));
