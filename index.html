@@ -1529,10 +1529,13 @@
   .ebook-settings-menu .ebook-setting-label{ margin-bottom:5px; }
   .ebook-settings-menu .ebook-settings-body{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; }
   .ebook-settings-menu .ebook-setting-block{ min-width:0; }
+  .ebook-settings-menu .margin-row{ gap:3px; justify-content:space-between; }
+  .ebook-settings-menu .margin-row .icon-btn{ min-width:28px; padding:6px 7px; font-size:14px; }
+  .ebook-settings-menu .margin-row b{ min-width:34px; }
   .ebook-settings-menu .ebook-setting-block:last-child{ grid-column:1/-1; }
   .ebook-settings-close{ float:right; margin:-3px -3px 5px 6px; }
   .ebook-menu-btn{ margin-left:auto; margin-right:8px; }
-  .ebook-reader-view{ transition:none; }
+  .ebook-reader-view{ transition:none; padding-top:var(--ebook-top-offset,0px); padding-bottom:var(--ebook-bottom-offset,0px); }
   .ebook-viewer{ transition:transform .18s ease-out; will-change:transform; }
   .ebook-bar-translation{ position:relative; max-height:none; overflow:visible; min-width:0; }
   .ebook-bar{ position:relative; z-index:5; }
@@ -1557,8 +1560,9 @@
   .ebook-reader-view.bar-bottom .ebook-bar.translation-long .ebook-bar-translation{ top:auto; bottom:100%; transform:none; padding:28px 12px 10px; white-space:normal; overflow:visible; background:linear-gradient(to top,rgba(20,18,15,.92),rgba(20,18,15,0)); }
   .ebook-reader-view.bar-top .ebook-bar.has-translation:not(.translation-long) .ebook-bar-translation,
   .ebook-reader-view.bar-bottom .ebook-bar.has-translation:not(.translation-long) .ebook-bar-translation{ left:0; top:5px; bottom:auto !important; right:148px; transform:none; padding:0 10px; line-height:1.3; }
-  .ebook-reader-view.bar-top .ebook-bar.translation-long .ebook-bar-translation{ left:0; right:148px; padding:5px 12px 28px; }
-  .ebook-reader-view.bar-bottom .ebook-bar.translation-long .ebook-bar-translation{ left:0; right:148px; padding:28px 12px 5px; }
+  .ebook-reader-view.bar-top .ebook-bar.translation-long .ebook-bar-translation,
+  .ebook-reader-view.bar-bottom .ebook-bar.translation-long .ebook-bar-translation{ left:0; right:148px; top:5px; bottom:auto !important; transform:none; padding:5px 12px 28px; }
+  .ebook-reader-view .ebook-bar.translation-long .ebook-bar-translation{ border-radius:0 0 18px 0; background:radial-gradient(ellipse 165% 165% at 0 0,rgba(20,18,15,.97) 0%,rgba(20,18,15,.94) 42%,rgba(20,18,15,.62) 70%,rgba(20,18,15,0) 100%) !important; }
   #ebookSaveBtn.saved{ animation:ebook-save-pop .42s ease; background:#2f8f6b; color:#fff; }
   #ebookBookmarkBtn{ background:transparent; color:#bbb; border:1px solid #777; }
   #ebookBookmarkBtn.active{ background:#1c78d4; border-color:#54a7fa; color:#fff; }
@@ -1698,11 +1702,8 @@
           </select>
         </div>
         <div class="ebook-setting-block">
-          <div class="ebook-setting-label">Fordítási sáv helye</div>
-          <div class="margin-row">
-            <button class="icon-btn" id="ebookBarTopBtn">Fent</button>
-            <button class="icon-btn" id="ebookBarBottomBtn">Lent</button>
-          </div>
+          <div class="ebook-setting-label">Olvasó margója</div>
+          <button class="icon-btn" id="ebookMarginBtn">📏 Margó beállítása</button>
         </div>
         <div class="ebook-setting-block">
           <div class="ebook-setting-label">Könyvek</div>
@@ -1713,7 +1714,7 @@
       </div>
       </div>
       <!-- Régi vezérlők: a korábbi egykönyves adatok áttelepítéséhez. -->
-      <div id="ebookOpenRow" hidden><img id="ebookCoverImg"><div id="ebookCoverFallback"></div><button id="ebookReadBtn" type="button"></button></div>
+      <div id="ebookOpenRow" hidden><img id="ebookCoverImg"><div id="ebookCoverFallback"></div><button id="ebookReadBtn" type="button"></button><button id="ebookBarTopBtn" type="button"></button><button id="ebookBarBottomBtn" type="button"></button></div>
     </div>
 
     <div class="ebook-reader-view bar-bottom" id="ebookReaderView">
@@ -3957,8 +3958,11 @@
   const MARGIN_BOTTOM_KEY = 'hu-multi-margin-bottom-v1';
   const PRACTICE_MARGIN_TOP_KEY = 'hu-multi-margin-top-practice-v1';
   const PRACTICE_MARGIN_BOTTOM_KEY = 'hu-multi-margin-bottom-practice-v1';
+  const EBOOK_MARGIN_TOP_KEY = 'hu-multi-margin-top-ebook-v1';
+  const EBOOK_MARGIN_BOTTOM_KEY = 'hu-multi-margin-bottom-ebook-v1';
   let topOffset = 0, bottomOffset = 0;
   let practiceTopOffset = 0, practiceBottomOffset = 0;
+  let ebookTopOffset = 0, ebookBottomOffset = 0;
   let marginTarget = 'main';
   const marginOverlay = document.getElementById('marginOverlay');
   const marginOpenBtn = document.getElementById('marginOpenBtn');
@@ -3974,8 +3978,10 @@
     document.documentElement.style.setProperty('--bottom-offset', bottomOffset + 'px');
     document.documentElement.style.setProperty('--practice-top-offset', practiceTopOffset + 'px');
     document.documentElement.style.setProperty('--practice-bottom-offset', practiceBottomOffset + 'px');
-    const t = marginTarget === 'practice' ? practiceTopOffset : topOffset;
-    const b = marginTarget === 'practice' ? practiceBottomOffset : bottomOffset;
+    document.documentElement.style.setProperty('--ebook-top-offset', ebookTopOffset + 'px');
+    document.documentElement.style.setProperty('--ebook-bottom-offset', ebookBottomOffset + 'px');
+    const t = marginTarget === 'practice' ? practiceTopOffset : (marginTarget === 'ebook' ? ebookTopOffset : topOffset);
+    const b = marginTarget === 'practice' ? practiceBottomOffset : (marginTarget === 'ebook' ? ebookBottomOffset : bottomOffset);
     topOffsetVal.textContent = t;
     bottomOffsetVal.textContent = b;
   }
@@ -3998,6 +4004,8 @@
         practiceTopOffset = topOffset;
         practiceBottomOffset = bottomOffset;
       }
+      ebookTopOffset = parseInt(localStorage.getItem(EBOOK_MARGIN_TOP_KEY) || '0', 10) || 0;
+      ebookBottomOffset = parseInt(localStorage.getItem(EBOOK_MARGIN_BOTTOM_KEY) || '0', 10) || 0;
     }catch(e){}
 
     if(!hasStored){
@@ -4020,11 +4028,13 @@
       localStorage.setItem(MARGIN_BOTTOM_KEY, String(bottomOffset));
       localStorage.setItem(PRACTICE_MARGIN_TOP_KEY, String(practiceTopOffset));
       localStorage.setItem(PRACTICE_MARGIN_BOTTOM_KEY, String(practiceBottomOffset));
+      localStorage.setItem(EBOOK_MARGIN_TOP_KEY, String(ebookTopOffset));
+      localStorage.setItem(EBOOK_MARGIN_BOTTOM_KEY, String(ebookBottomOffset));
     }catch(e){}
   }
   function openMarginOverlay(target){
     marginTarget = target;
-    marginTitle.textContent = target === 'practice' ? 'Felső és alsó margó (Gyakorlás)' : 'Felső és alsó margó (Főoldal)';
+    marginTitle.textContent = target === 'practice' ? 'Felső és alsó margó (Gyakorlás)' : (target === 'ebook' ? 'Felső és alsó margó (E-könyv)' : 'Felső és alsó margó (Főoldal)');
     applyOffsets();
     marginOverlay.classList.add('show');
   }
@@ -4043,6 +4053,8 @@
   marginResetBtn.addEventListener('click', () => {
     if(marginTarget === 'practice'){
       practiceTopOffset = 0; practiceBottomOffset = 0;
+    } else if(marginTarget === 'ebook'){
+      ebookTopOffset = 0; ebookBottomOffset = 0;
     } else {
       topOffset = 0; bottomOffset = 0;
     }
@@ -4054,6 +4066,9 @@
       if(marginTarget === 'practice'){
         if(btn.dataset.adj === 'top') practiceTopOffset = Math.max(0, Math.min(120, practiceTopOffset + delta));
         else practiceBottomOffset = Math.max(0, Math.min(120, practiceBottomOffset + delta));
+      } else if(marginTarget === 'ebook'){
+        if(btn.dataset.adj === 'top') ebookTopOffset = Math.max(0, Math.min(120, ebookTopOffset + delta));
+        else ebookBottomOffset = Math.max(0, Math.min(120, ebookBottomOffset + delta));
       } else {
         if(btn.dataset.adj === 'top') topOffset = Math.max(0, Math.min(120, topOffset + delta));
         else bottomOffset = Math.max(0, Math.min(120, bottomOffset + delta));
@@ -5142,18 +5157,21 @@
   const ebookOriginalTranslation=ebookShowTranslation;
   ebookShowTranslation=async function(text,isSentence){ await ebookOriginalTranslation(text,isSentence); const shown=ebookBarTranslation.textContent||''; ebookBar.classList.toggle('has-translation',!!shown); ebookBar.classList.toggle('translation-long',shown.length>42); };
   let ebookTapTimer=null;
-  function ebookSetTapPlay(text){ clearTimeout(ebookTapTimer); ebookPlaying=true; ebookPlayBtn.textContent='⏸'; ebookTapTimer=setTimeout(()=>{ ebookPlaying=false; ebookPlayBtn.textContent='▶'; },Math.max(700, String(text||'').length*105)); }
+  function ebookSetTapPlay(text){}
   ebookHandleSentenceSelect=function(span,doc){ ebookSelectionIsSentence=true; ebookStopSpeaking(); ebookQueueIdx=0; const i=parseInt(span.dataset.sent,10);doc.querySelectorAll('.ebook-word-active,.ebook-sentence-active').forEach(x=>x.classList.remove('ebook-word-active','ebook-sentence-active'));doc.querySelectorAll('.ebook-word[data-sent="'+i+'"]').forEach(x=>x.classList.add('ebook-sentence-active'));ebookCurrentWord=span.dataset.word;ebookCurrentSentenceIdx=i;const info=LANGS[ebookSettings.lang]||LANGS.en;speak(ebookChapterSentences[i],info.tts);ebookSetTapPlay(ebookChapterSentences[i]);ebookShowTranslation(ebookChapterSentences[i],true);};
   const ebookOriginalWordSelect=ebookHandleWordSelect;
   ebookHandleWordSelect=function(span,doc){ ebookSelectionIsSentence=false; ebookOriginalWordSelect(span,doc); ebookSetTapPlay(span.dataset.word); };
   ebookExitToSettings=function(){ ebookStopSpeaking(); ebookReaderView.classList.remove('show'); ebookReaderView.style.transform=''; ebookReaderView.style.opacity=''; ebookSettingsView.classList.remove('hide'); ebookClearTranslation(); ebookRefreshLibrary(); };
   const ebookOriginalRendered=ebookOnContentRendered;
-  ebookOnContentRendered=function(contents){ ebookOriginalRendered(contents); const doc=contents.document; let x=0,y=0; doc.addEventListener('click',e=>{if(!e.target.closest('.ebook-word')) ebookClearTranslation();}); doc.addEventListener('touchstart',e=>{x=e.touches[0].clientX;y=e.touches[0].clientY;},{passive:true}); doc.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-x,dy=e.changedTouches[0].clientY-y;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)){try{dx<0?ebookRendition.next():ebookRendition.prev();}catch(err){}}else if(Math.abs(dy)>70&&Math.abs(dy)>Math.abs(dx)){ebookExitToSettings();}},{passive:true}); };
+  ebookOnContentRendered=function(contents){ ebookOriginalRendered(contents); const doc=contents.document; let x=0,y=0; doc.addEventListener('click',e=>{if(!e.target.closest('.ebook-word')) ebookClearTranslation();try{window.speechSynthesis.cancel();}catch(err){} ebookPlaying=false; ebookPlayBtn.textContent='▶';}); doc.addEventListener('touchstart',e=>{x=e.touches[0].clientX;y=e.touches[0].clientY;},{passive:true}); doc.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-x,dy=e.changedTouches[0].clientY-y;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)){try{dx<0?ebookRendition.next():ebookRendition.prev();}catch(err){}}else if(Math.abs(dy)>70&&Math.abs(dy)>Math.abs(dx)){ebookExitToSettings();}},{passive:true}); };
   ebookSaveBtn.addEventListener('click',()=>{ if(ebookSelectionIsSentence && ebookCurrentSentenceIdx!=null) ebookSaveEntry({fxSentence:ebookChapterSentences[ebookCurrentSentenceIdx]}); else if(ebookCurrentWord) ebookSaveEntry({foreign:ebookCurrentWord}); else return; ebookSaveBtn.classList.add('saved');setTimeout(()=>ebookSaveBtn.classList.remove('saved'),430); });
+  ebookViewer.addEventListener('click',()=>{ try{window.speechSynthesis.cancel();}catch(e){} ebookPlaying=false; ebookPlayBtn.textContent='▶'; });
   ebookBookmarkBtn.addEventListener('click',ebookSetBookmark);
   ebookMenuBtn.addEventListener('click',()=>{ebookSettingsMenu.classList.toggle('show'); ebookSettingsMenu.setAttribute('aria-hidden',String(!ebookSettingsMenu.classList.contains('show')));});
   ebookThemeSelect.value=ebookSettings.theme; ebookThemeSelect.addEventListener('change',()=>{ebookSettings.theme=ebookThemeSelect.value;ebookSaveSettings();ebookApplySettingsUI();ebookApplyRenditionStyles();});
   document.getElementById('ebookSettingsCloseBtn').addEventListener('click',()=>{ebookSettingsMenu.classList.remove('show');ebookSettingsMenu.setAttribute('aria-hidden','true');});
+  document.getElementById('ebookMarginBtn').addEventListener('click',()=>openMarginOverlay('ebook'));
+  ebookOpenBtn.addEventListener('click',()=>{ebookSettings.barPos='top';ebookSaveSettings();});
   ebookUploadNewBtn.addEventListener('click',()=>ebookFileInput.click());
   ebookFileInput.addEventListener('change',async()=>{ const files=Array.from(ebookFileInput.files||[]); if(!files.length)return; ebookStatus.textContent='Importálás…'; try{await ebookLoadLibs();for(const file of files){const data=await file.arrayBuffer();const temp=ePub(data.slice(0));await temp.ready;let cover='';try{const url=await temp.coverUrl();if(url){const blob=await fetch(url).then(r=>r.blob());cover=await new Promise((ok,bad)=>{const fr=new FileReader();fr.onload=()=>ok(fr.result);fr.onerror=bad;fr.readAsDataURL(blob);});}}catch(e){};const title=(temp.package&&temp.package.metadata&&temp.package.metadata.title)||file.name.replace(/\.epub$/i,'');await ebookLibraryPut({id:makeId(),data,meta:{name:file.name,title,cover}});try{temp.destroy();}catch(e){}} await ebookRefreshLibrary();ebookStatus.textContent='';}catch(e){console.error(e);ebookStatus.textContent='Nem sikerült minden könyvet importálni.';} ebookFileInput.value='';});
   ebookOpenBtn.addEventListener('click',()=>setTimeout(()=>{ebookSettingsMenu.classList.remove('show');ebookRefreshLibrary();},0));

@@ -1,7 +1,7 @@
 // Service Worker a Szómondó 1 alkalmazáshoz
 // Verzió: v39 - E-könyv olvasó (epub, szó/mondat mentés, könyvjelző)
 
-const CACHE = 'szomondo-1-v43';
+const CACHE = 'szomondo-1-v44';
 const ASSETS = [
   './',
   './index.html',
