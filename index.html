@@ -1545,7 +1545,7 @@
   .ebook-reader-view.bar-top .ebook-viewer{ margin-top:0; }
   .ebook-viewer{ transition:transform .18s ease-out; will-change:transform; }
   .ebook-bar-translation{ position:relative; max-height:none; overflow:visible; min-width:0; }
-  .ebook-bar{ position:relative; z-index:5; background:#1e1d1c; }
+  .ebook-bar{ position:relative; z-index:5; background:#1e1d1c; box-shadow:0 3px 10px rgba(0,0,0,.28); }
   .ebook-bar.has-translation .ebook-bar-translation{ position:absolute; left:0; right:148px; z-index:0; padding:10px 12px 26px; background:linear-gradient(to bottom,rgba(20,18,15,.92) 0%,rgba(20,18,15,.88) 65%,rgba(20,18,15,0) 100%); text-shadow:0 1px 2px #000; pointer-events:none; }
   .ebook-reader-view.bar-top .ebook-bar.has-translation .ebook-bar-translation{ top:100%; }
   .ebook-reader-view.bar-bottom .ebook-bar.has-translation .ebook-bar-translation{ bottom:100%; background:linear-gradient(to top,rgba(20,18,15,.92) 0%,rgba(20,18,15,.88) 65%,rgba(20,18,15,0) 100%); }
@@ -1571,10 +1571,10 @@
   .ebook-reader-view.bar-bottom .ebook-bar.translation-long .ebook-bar-translation{ left:0; right:148px; top:calc(5px + var(--ebook-translation-offset,0px)); bottom:auto !important; transform:none; padding:5px 12px 28px; }
   .ebook-reader-view .ebook-bar.translation-long .ebook-bar-translation{ border-radius:0 0 18px 0; background:radial-gradient(ellipse 165% 165% at 0 0,#1e1d1c 0%,#1e1d1c 42%,rgba(30,29,28,.58) 70%,rgba(30,29,28,0) 100%) !important; }
   #ebookSaveBtn.saved{ animation:ebook-save-glow .42s ease; background:#2f8f6b; color:#fff; }
-  #ebookBookmarkBtn{ background:transparent; color:#d5d5d5; border:1px solid #aaa; }
-  #ebookBookmarkBtn.active{ background:transparent; border-color:#d5d5d5; color:#fff; }
-  #ebookBookmarkBtn svg{ width:19px; height:22px; fill:transparent; stroke:currentColor; stroke-width:2; stroke-linejoin:round; }
-  #ebookBookmarkBtn.active svg{ fill:#2588e8; stroke:#d5d5d5; }
+  #ebookBookmarkBtn{ background:transparent !important; color:#d5d5d5; border:none !important; border-radius:0; }
+  #ebookBookmarkBtn.active{ background:transparent !important; color:#d5d5d5; }
+  #ebookBookmarkBtn svg{ width:30px; height:34px; fill:transparent; stroke:currentColor; stroke-width:1.25; stroke-linejoin:round; }
+  #ebookBookmarkBtn.active svg{ fill:#67baff; stroke:#d5d5d5; }
   @keyframes ebook-save-glow{ 0%,100%{box-shadow:none} 45%{box-shadow:0 0 0 5px rgba(47,143,107,.42)} }
 </style>
 </head>
@@ -5203,7 +5203,7 @@
   document.getElementById('ebookMarginBtn').addEventListener('click',()=>openMarginOverlay('ebook'));
   ebookOpenBtn.addEventListener('click',()=>{ebookSettings.barPos='top';ebookSaveSettings();});
   const ebookOpenBookWithTopBar = ebookOpenBook;
-  ebookOpenBook = async function(id){ ebookSettings.barPos='top'; ebookSaveSettings(); return ebookOpenBookWithTopBar(id); };
+  ebookOpenBook = async function(id){ ebookSettings.barPos='top'; ebookSaveSettings(); await ebookOpenBookWithTopBar(id); if(ebookRendition){ ebookRendition.on('relocated',loc=>{ const cfi=loc&&loc.start&&loc.start.cfi; ebookLastCfi=cfi||ebookLastCfi; ebookBookmarkBtn.classList.toggle('active',ebookGetBookmarks()[id]===ebookLastCfi); }); } };
   ebookUploadNewBtn.addEventListener('click',()=>ebookFileInput.click());
   ebookFileInput.addEventListener('change',async()=>{ const files=Array.from(ebookFileInput.files||[]); if(!files.length)return; ebookStatus.textContent='Importálás…'; try{await ebookLoadLibs();for(const file of files){const data=await file.arrayBuffer();const temp=ePub(data.slice(0));await temp.ready;let cover='';try{const url=await temp.coverUrl();if(url){const blob=await fetch(url).then(r=>r.blob());cover=await new Promise((ok,bad)=>{const fr=new FileReader();fr.onload=()=>ok(fr.result);fr.onerror=bad;fr.readAsDataURL(blob);});}}catch(e){};const title=(temp.package&&temp.package.metadata&&temp.package.metadata.title)||file.name.replace(/\.epub$/i,'');await ebookLibraryPut({id:makeId(),data,meta:{name:file.name,title,cover}});try{temp.destroy();}catch(e){}} await ebookRefreshLibrary();ebookStatus.textContent='';}catch(e){console.error(e);ebookStatus.textContent='Nem sikerült minden könyvet importálni.';} ebookFileInput.value='';});
   ebookOpenBtn.addEventListener('click',()=>setTimeout(()=>{ebookSettingsMenu.classList.remove('show');ebookRefreshLibrary();},0));
