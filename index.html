@@ -569,17 +569,20 @@
     box-shadow: 0 0 0 3px rgba(255,255,255,0.25), 0 0 16px 4px rgba(255,255,255,0.35);
   }
   #memoryJumpTopBtn{ display:none; }
-  .memory-book-controls{ margin-left:6px; display:flex; flex-direction:column; gap:4px; }
-  #memoryBookBtn,#memoryRulesBtn{ margin:0; flex-shrink:0; }
+  .memory-book-controls{ margin-left:6px; display:flex; }
+  #memoryBookBtn{ margin:0; flex-shrink:0; }
   #memoryRulesBtn{ display:none; }
-  .memory-overlay.book-mode #memoryRulesBtn{ display:flex; }
   #memoryBookBtn.active{ background:rgba(var(--paprika-rgb),.18); border-color:var(--paprika); box-shadow:0 0 12px rgba(var(--paprika-rgb),.35); }
   .memory-book-grid{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; padding:8px 0; }
   .memory-chapter-card{ appearance:none; min-height:76px; border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--ink); cursor:pointer; padding:8px 5px; font-family:'Fraunces',serif; font-size:13px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; }
   .memory-chapter-card small{ font-family:'Work Sans',sans-serif; font-size:10px; color:var(--ink-soft); }
   .memory-chapter-card.selected{ outline:2px solid var(--teal); background:rgba(31,76,70,.15); }
-  .memory-overlay.book-mode .memory-toolbar{ gap:3px; }
-  .memory-overlay.book-mode .memory-toolbar .mem-toolbar-btn{ flex:0 1 auto; padding:6px 5px; font-size:10px; }
+  .memory-overlay.book-mode .memory-toolbar{ display:flex !important; gap:6px; width:auto; margin:0; padding:0 16px 10px; }
+  .memory-overlay.book-mode .memory-toolbar #memoryNoteBtn{ display:none; }
+  .memory-overlay.book-mode .memory-toolbar #memoryRulesBtn{ display:flex; }
+  .memory-overlay.book-mode .memory-toolbar .mem-toolbar-btn{ display:flex !important; flex:0 0 135px; min-width:0; padding:6px 3px; font-size:10px; white-space:nowrap; justify-content:center; }
+  .memory-overlay.book-mode .memory-toolbar #memoryImportBtn{ margin-left:auto; }
+  .memory-overlay.book-mode .memory-sticky-top{ border-bottom:1px solid var(--line); }
   .memory-toolbar{ justify-content:flex-end; }
   .memory-toolbar #memoryNoteBtn{ margin-right:auto; }
   .memory-toolbar .mem-toolbar-btn{ flex:0 0 42%; }
@@ -1869,7 +1872,7 @@
     <div class="memory-panel">
       <div class="memory-sticky-top">
         <div class="memory-header">
-          <button class="memory-lang-frame" id="memoryLangTag">EN</button><div class="memory-book-controls"><button class="memory-lang-frame" id="memoryBookBtn" aria-label="Könyvfordítások">📖</button><button class="memory-lang-frame" id="memoryRulesBtn" aria-label="AI CSV-szabályok letöltése">📥</button></div>
+          <button class="memory-lang-frame" id="memoryLangTag">EN</button><div class="memory-book-controls"><button class="memory-lang-frame" id="memoryBookBtn" aria-label="Könyvfordítások">📖</button></div>
           <div class="memory-header-btns">
             <button class="header-icon-btn" id="memoryAllBtn" style="display:none;">ALL</button>
             <button class="header-icon-btn" id="memoryAddBtn" aria-label="Kijelölés a szótárba">＋</button>
@@ -1880,7 +1883,7 @@
           </div>
         </div>
         <div class="memory-toolbar">
-          <button class="memory-lang-frame" id="memoryNoteBtn" aria-label="Megjegyzés sor beszúrása">📝</button>
+          <button class="memory-lang-frame" id="memoryNoteBtn" aria-label="Megjegyzés sor beszúrása">📝</button><button class="memory-lang-frame" id="memoryRulesBtn" aria-label="AI CSV-szabályok letöltése">📥</button>
           <button class="icon-btn mem-toolbar-btn" id="memoryImportBtn">⬆ Import (CSV)</button>
           <button class="icon-btn mem-toolbar-btn" id="memoryExportBtn">⬇ Export</button>
         </div>
@@ -2166,6 +2169,7 @@
   const memoryExportBtn = document.getElementById('memoryExportBtn');
   const memoryTableBody = document.getElementById('memoryTableBody');
   const memoryEmptyState = document.getElementById('memoryEmptyState');
+
 
   const exampleBtn = document.getElementById('exampleBtn');
   const visualEffectBtn = document.getElementById('visualEffectBtn');
@@ -2854,6 +2858,10 @@ Fordítandó eredeti szöveg:
 
   function closeMemoryOverlay(){
     memoryOverlay.classList.remove('show');
+    memoryBookMode = false;
+    memoryBookChapter = null;
+    memoryBookBtn.classList.remove('active');
+    memoryOverlay.classList.remove('book-mode');
     memorySelectMode = false;
     memorySelectedIds.clear();
     memoryAddBtn.classList.remove('active');
@@ -2868,6 +2876,9 @@ Fordítandó eredeti szöveg:
     reshuffleAreaTheme('main');
     // visszaállítjuk a szerkeszthetőséget
     memoryTable.classList.remove('trash-mode');
+    memoryJumpAtBottom = false;
+    memoryJumpBottomBtn.textContent = '⤓';
+    memoryJumpBottomBtn.setAttribute('aria-label', 'Ugrás a végére');
   }
   memoryCloseBtn.addEventListener('click', closeMemoryOverlay);
   memoryOverlay.addEventListener('click', (e) => {
