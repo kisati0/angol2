@@ -2253,6 +2253,7 @@
   let addMemSelectedIds = new Set();
   let memoryEntries = [];
   let memoryBookMode = false;
+  let memoryBookId = null;
   let memoryBookChapter = null;
   const EBOOK_TRANSLATIONS_KEY = 'hu-ebook-translations-v1';
 
@@ -2281,15 +2282,27 @@
   function memoryTranslationKey(){ return profilManager.getDataKey(EBOOK_TRANSLATIONS_KEY); }
   function loadBookTranslations(){ try{return JSON.parse(localStorage.getItem(memoryTranslationKey())||'{}');}catch(e){return {};} }
   function saveBookTranslations(data){ try{localStorage.setItem(memoryTranslationKey(),JSON.stringify(data));}catch(e){showError('Nem sikerült menteni a könyvfordításokat.');} }
-  function currentTranslationBookId(){ try{return localStorage.getItem('hu-ebook-translation-current-book')||localStorage.getItem('hu-ebook-last-id')||'aktualis-konyv';}catch(e){return 'aktualis-konyv';} }
+  function currentTranslationBookId(){
+    if(memoryBookId) return memoryBookId;
+    try{return ebookActiveId||localStorage.getItem('hu-ebook-translation-current-book')||localStorage.getItem('hu-ebook-last-id')||'aktualis-konyv';}catch(e){return 'aktualis-konyv';}
+  }
   function currentBookTranslations(){ const all=loadBookTranslations(); return all[currentTranslationBookId()]||{}; }
-  function renderMemoryBookView(){
+  async function renderMemoryBookView(){
     memoryTable.style.display='none'; memoryEmptyState.style.display='none'; memoryAddRowBtn.style.display='none'; memoryBookView.style.display='block';
+    if(!memoryBookId){
+      memoryBookView.innerHTML='<div class="empty-state">Könyvek betöltése…</div>';
+      let books=[]; try{books=await ebookLibraryList();}catch(e){}
+      if(!memoryBookMode || memoryBookId) return;
+      memoryBookView.innerHTML=books.length?'<div class="ebook-library">'+books.map(book=>'<button class="ebook-card" type="button" data-memory-book="'+escapeHtml(book.id)+'"><span class="ebook-card-cover">'+(book.meta&&book.meta.cover?'<img alt="Borító" src="'+ebookEscAttr(book.meta.cover)+'">':'<span class="ebook-card-fallback">'+escapeHtml(ebookTitle(book.meta||{}))+'</span>')+'</span></button>').join('')+'</div>':'<div class="empty-state">Még nincs importált könyv.</div>';
+      memoryBookView.querySelectorAll('[data-memory-book]').forEach(btn=>btn.addEventListener('click',()=>{ memoryBookId=btn.dataset.memoryBook; memoryBookChapter=null; renderMemoryBookView(); }));
+      return;
+    }
     const chapters=currentBookTranslations();
     if(memoryBookChapter!=null){ const rows=chapters[memoryBookChapter]||[]; memoryBookView.innerHTML='<button class="icon-btn memory-book-back" id="memoryBookBackBtn">← Fejezetek</button><table id="memoryBookTable"><thead><tr><th>Idegen mondat</th><th>Magyar mondat</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+escapeHtml(r.foreign||'')+'</td><td>'+escapeHtml(r.hu||'')+'</td></tr>').join('')+'</tbody></table>'+(rows.length?'':'<div class="empty-state">Nincs mondat ebben a fejezetben.</div>');
       document.getElementById('memoryBookBackBtn').addEventListener('click',()=>{memoryBookChapter=null;renderMemoryBookView();}); return; }
     const keys=Object.keys(chapters).sort((a,b)=>Number(a)-Number(b));
-    memoryBookView.innerHTML=keys.length?'<div class="memory-book-grid">'+keys.map(ch=>'<button class="memory-chapter-card" data-chapter="'+escapeHtml(ch)+'">'+escapeHtml('Fejezet '+ch)+'<small>'+chapters[ch].length+' mondat</small></button>').join('')+'</div>':'<div class="empty-state">Ehhez a könyvhöz még nincs feltöltött fejezetfordítás.</div>';
+    memoryBookView.innerHTML='<button class="icon-btn memory-book-back" id="memoryBooksBackBtn">← Könyvek</button>'+(keys.length?'<div class="memory-book-grid">'+keys.map(ch=>'<button class="memory-chapter-card" data-chapter="'+escapeHtml(ch)+'">'+escapeHtml('Fejezet '+ch)+'<small>'+chapters[ch].length+' mondat</small></button>').join('')+'</div>':'<div class="empty-state">Ehhez a könyvhöz még nincs feltöltött fejezetfordítás.</div>');
+    document.getElementById('memoryBooksBackBtn').addEventListener('click',()=>{memoryBookId=null;memoryBookChapter=null;renderMemoryBookView();});
     memoryBookView.querySelectorAll('[data-chapter]').forEach(btn=>{ const chapter=btn.dataset.chapter; btn.classList.toggle('selected',memorySelectedIds.has('chapter:'+chapter)); btn.addEventListener('click',()=>{ if(memorySelectMode){ const id='chapter:'+chapter; memorySelectedIds.has(id)?memorySelectedIds.delete(id):memorySelectedIds.add(id); renderMemoryBookView(); return; } if(memoryTrashMode){ const all=loadBookTranslations(),bookId=currentTranslationBookId(); if(all[bookId]){ delete all[bookId][chapter]; if(!Object.keys(all[bookId]).length) delete all[bookId]; saveBookTranslations(all); } renderMemoryBookView(); return; } memoryBookChapter=chapter;renderMemoryBookView(); }); });
   }
   function downloadBookCsvRules(){ if(!confirm('Letöltöd az AI-nak szóló CSV-generálási szabályokat?'))return; const rules=`FEJEZETFORDÍTÓ CSV – AI SABLON
@@ -2301,25 +2314,24 @@ Feladat: Fordítsd le az alább bemásolt könyvfejezetet magyarra, mondatonkén
 CSAK pontosvesszővel (;) tagolt CSV-t adj vissza. Ne írj magyarázatot, címet, Markdown-kódblokkot vagy más szöveget.
 
 Kötelező fejléc – pontosan ez legyen a válasz első sora:
-könyv_azonosító;fejezet;idegen_mondat;magyar_mondat;nyelv
+fejezet;idegen_mondat;magyar_mondat;nyelv
 
 Kötelező szabályok:
 1. Egy CSV-sor pontosan egy teljes eredeti mondatot és annak teljes magyar fordítását tartalmazza.
 2. Az idegen_mondat mezőt változtatás nélkül másold át az eredeti szövegből, írásjelekkel együtt.
 3. A magyar_mondat természetes, teljes magyar fordítás legyen.
-4. Mind az öt oszlopot töltsd ki minden adatsorban.
+4. Mind a négy oszlopot töltsd ki minden adatsorban.
 5. A mezőelválasztó mindig pontosvessző (;).
 6. Ha egy mező pontosvesszőt, idézőjelet vagy sortörést tartalmaz, tedd dupla idézőjelek közé.
 7. A mezőn belüli dupla idézőjelet két dupla idézőjellel írd.
 8. UTF-8-kompatibilis szöveget használj.
 9. Ne számozd a sorokat, ne hagyj üres sort, és ne adj hozzá további oszlopot.
-10. A könyv_azonosító, a fejezet és a nyelv értéke minden adatsorban azonos legyen.
+10. A fejezet és a nyelv értéke minden adatsorban azonos legyen.
 
 Helyes CSV-minta:
-könyv_azonosító;fejezet;idegen_mondat;magyar_mondat;nyelv
-kis-herceg;1;"Once when I was six years old I saw a magnificent picture in a book.";"Hatéves koromban egyszer egy csodálatos képet láttam egy könyvben.";en
+fejezet;idegen_mondat;magyar_mondat;nyelv
+1;"Once when I was six years old I saw a magnificent picture in a book.";"Hatéves koromban egyszer egy csodálatos képet láttam egy könyvben.";en
 
-Könyv azonosítója: [IDE ÍRD A KÖNYV AZONOSÍTÓJÁT, PL. kis-herceg]
 Fejezet: [IDE ÍRD A FEJEZETET, PL. 1]
 Nyelv: [IDE ÍRD AZ EREDETI NYELV KÓDJÁT, PL. en]
 
@@ -2328,9 +2340,19 @@ Fordítsd le a következő angol szöveget magyarra a lehető legpontosabban. El
 Fordítandó eredeti szöveg:
 `; const blob=new Blob([rules],{type:'text/plain;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='Szabaly-konyv-fejezet-forditas.txt';a.click();URL.revokeObjectURL(url); }
   async function processBookTranslationImport(file){
-    const text=await readCsvText(file); const lines=text.split(/\r?\n/).filter(x=>x.trim()); const delim=detectDelimiter(lines); const all=loadBookTranslations(); let imported=0, bookId='';
-    for(let i=0;i<lines.length;i++){ const row=parseCsvLine(lines[i],delim); if(i===0&&String(row[0]).toLowerCase().includes('könyv'))continue; if(row.length<5)continue; const [book,chapter,foreign,hu,lang]=row.map(x=>String(x||'').trim()); if(!book||!chapter||!foreign||!hu||lang!==selectedLang)continue; bookId=book; all[book]||(all[book]={}); all[book][chapter]||(all[book][chapter]=[]); const rows=all[book][chapter]; const ex=rows.find(x=>norm(x.foreign)===norm(foreign)); if(ex)ex.hu=hu;else rows.push({foreign,hu}); imported++; }
-    if(bookId){try{localStorage.setItem('hu-ebook-translation-current-book',bookId);localStorage.setItem(EBOOK_PROFILE_KEY,String(profilManager.activeProfileId));}catch(e){} saveBookTranslations(all);} memoryBookChapter=null; renderMemoryTable(); showMemoryNote(imported?'Könyvfordítás importálva: '+imported+' mondat.':'Nem találtam importálható könyvfordítási sort.');
+    if(!memoryBookId){ showMemoryNote('Előbb válaszd ki a könyv borítóját.'); return; }
+    const text=await readCsvText(file); const lines=text.split(/\r?\n/).filter(x=>x.trim()); const delim=detectDelimiter(lines); const all=loadBookTranslations(); let imported=0; const bookId=memoryBookId;
+    for(let i=0;i<lines.length;i++){
+      const row=parseCsvLine(lines[i],delim).map(x=>String(x||'').trim());
+      if(i===0&&(String(row[0]).toLowerCase().includes('fejezet')||String(row[0]).toLowerCase().includes('könyv')))continue;
+      if(row.length<4)continue;
+      const [chapter,foreign,hu,lang]=row.length>=5 ? row.slice(1,5) : row;
+      if(!chapter||!foreign||!hu||lang!==selectedLang)continue;
+      all[bookId]||(all[bookId]={}); all[bookId][chapter]||(all[bookId][chapter]=[]);
+      const rows=all[bookId][chapter], ex=rows.find(x=>norm(x.foreign)===norm(foreign));
+      if(ex)ex.hu=hu;else rows.push({foreign,hu}); imported++;
+    }
+    if(imported){try{localStorage.setItem('hu-ebook-translation-current-book',bookId);localStorage.setItem(EBOOK_PROFILE_KEY,String(profilManager.activeProfileId));}catch(e){} saveBookTranslations(all);} memoryBookChapter=null; renderMemoryTable(); showMemoryNote(imported?'Könyvfordítás importálva: '+imported+' mondat.':'Nem találtam importálható könyvfordítási sort.');
   }
   function findInMemory(text){
     const n = norm(text);
@@ -2481,7 +2503,7 @@ Fordítandó eredeti szöveg:
     }
     renderMemoryTable();
   });
-  memoryBookBtn.addEventListener('click',()=>{ memoryBookMode=!memoryBookMode; memoryBookChapter=null; memoryBookBtn.classList.toggle('active',memoryBookMode); memoryOverlay.classList.toggle('book-mode',memoryBookMode); memoryLangTag.classList.toggle('find-on',false); renderMemoryTable(); });
+  memoryBookBtn.addEventListener('click',()=>{ memoryBookMode=!memoryBookMode; memoryBookId=null; memoryBookChapter=null; memoryBookBtn.classList.toggle('active',memoryBookMode); memoryOverlay.classList.toggle('book-mode',memoryBookMode); memoryLangTag.classList.toggle('find-on',false); renderMemoryTable(); });
   memoryRulesBtn.addEventListener('click',()=>downloadBookCsvRules());
 
   const memoryNoteBtn = document.getElementById('memoryNoteBtn');
@@ -2756,6 +2778,7 @@ Fordítandó eredeti szöveg:
 
   memoryAddBtn.addEventListener('click', () => {
     if(memoryBookMode){
+      if(!memoryBookId){ showMemoryNote('Előbb válaszd ki a könyv borítóját.'); return; }
       if(!memorySelectMode){ memorySelectMode=true; memorySelectedIds.clear(); memoryAddBtn.classList.add('active'); memoryAllBtn.style.display='flex'; renderMemoryBookView(); return; }
       const chapters=currentBookTranslations(); let added=0;
       [...memorySelectedIds].filter(id=>id.startsWith('chapter:')).forEach(id=>{ const ch=id.slice(8); (chapters[ch]||[]).forEach(r=>{ if(!memoryEntries.some(e=>e.lang===selectedLang&&norm(e.fxSentence)===norm(r.foreign))){ memoryEntries.push({id:makeId(),hu:'',foreign:'',huSentence:r.hu,fxSentence:r.foreign,lang:selectedLang,updatedAt:Date.now()});added++; } }); });
@@ -2859,6 +2882,7 @@ Fordítandó eredeti szöveg:
   function closeMemoryOverlay(){
     memoryOverlay.classList.remove('show');
     memoryBookMode = false;
+    memoryBookId = null;
     memoryBookChapter = null;
     memoryBookBtn.classList.remove('active');
     memoryOverlay.classList.remove('book-mode');
@@ -2902,7 +2926,7 @@ Fordítandó eredeti szöveg:
 
   memoryExportBtn.addEventListener('click', () => {
     if(memoryBookMode){
-      const bookId=currentTranslationBookId(), chapters=currentBookTranslations(); const rows=['könyv_azonosító;fejezet;idegen_mondat;magyar_mondat;nyelv']; Object.keys(chapters).forEach(ch=>chapters[ch].forEach(r=>rows.push([bookId,ch,r.foreign,r.hu,selectedLang].map(v=>csvEscape(v,';')).join(';')))); const blob=new Blob([rows.join('\r\n')],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='konyvforditas-'+bookId+'.csv';a.click();URL.revokeObjectURL(url);return;
+      if(!memoryBookId){ showMemoryNote('Előbb válaszd ki a könyv borítóját.'); return; } const bookId=currentTranslationBookId(), chapters=currentBookTranslations(); const rows=['fejezet;idegen_mondat;magyar_mondat;nyelv']; Object.keys(chapters).forEach(ch=>chapters[ch].forEach(r=>rows.push([ch,r.foreign,r.hu,selectedLang].map(v=>csvEscape(v,';')).join(';')))); const blob=new Blob([rows.join('\r\n')],{type:'text/csv;charset=utf-8;'}); const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='konyvforditas-'+bookId+'.csv';a.click();URL.revokeObjectURL(url);return;
     }
     const visible = memoryEntries.filter(e => e.lang === selectedLang);
     const header = ['Magyar szó','Idegen szó','Magyar mondat','Idegen mondat','Kapcsolt sorok'];
@@ -5312,7 +5336,13 @@ Fordítandó eredeti szöveg:
   const ebookThemeSelect = document.getElementById('ebookThemeSelect');
   let ebookActiveId = null, ebookBooksMeta = [], ebookSelectionIsSentence = false;
   function ebookTranslationStore(profileId){ try{const key=profileId===1?EBOOK_TRANSLATIONS_KEY:(EBOOK_TRANSLATIONS_KEY+'_p'+profileId);return JSON.parse(localStorage.getItem(key)||'{}');}catch(e){return {};} }
-  function ebookStoredSentenceTranslation(text){ let bookId='';try{bookId=localStorage.getItem('hu-ebook-translation-current-book')||'';}catch(e){} const stores=[ebookTranslationStore(ebookGetSelectedProfileId()),ebookTranslationStore(profilManager.activeProfileId)]; for(const data of stores){ const chapters=data[bookId]||{}; for(const rows of Object.values(chapters)){ const hit=rows.find(r=>norm(r.foreign)===norm(text)); if(hit&&hit.hu)return hit.hu; } } return ''; }
+  function ebookStoredSentenceTranslation(text){
+    const bookId=ebookActiveId;
+    if(!bookId) return '';
+    const stores=[ebookTranslationStore(ebookGetSelectedProfileId()),ebookTranslationStore(profilManager.activeProfileId)];
+    for(const data of stores){ const chapters=data[bookId]||{}; for(const rows of Object.values(chapters)){ const hit=rows.find(r=>norm(r.foreign)===norm(text)); if(hit&&hit.hu)return hit.hu; } }
+    return '';
+  }
   function ebookUpdateMissingTranslation(){ const exists=ebookChapterSentences.some(sentence=>!!ebookStoredSentenceTranslation(sentence)); ebookMissingTranslationNote.classList.toggle('show',!exists); }
   function ebookLibraryDb(){ return new Promise((resolve,reject) => { const r=indexedDB.open(EBOOK_IDB_NAME,2); r.onupgradeneeded=()=>{ const db=r.result; if(!db.objectStoreNames.contains('library')) db.createObjectStore('library',{keyPath:'id'}); if(db.objectStoreNames.contains('books')){ const tx=r.transaction; const old=tx.objectStore('books').get('current'); old.onsuccess=()=>{ if(old.result && old.result.data) tx.objectStore('library').put({id:'legacy-'+Date.now(),data:old.result.data,meta:old.result.meta||{name:'Korábbi könyv'}}); }; } }; r.onsuccess=()=>resolve(r.result); r.onerror=()=>reject(r.error); }); }
   async function ebookLibraryList(){ const db=await ebookLibraryDb(); return new Promise((resolve,reject)=>{const q=db.transaction('library').objectStore('library').getAll();q.onsuccess=()=>resolve(q.result||[]);q.onerror=()=>reject(q.error);}); }
