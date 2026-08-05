@@ -2593,6 +2593,25 @@
       linkBtn.textContent = linkCount ? String(linkCount) : '🔗';
       if(linkCount) linkBtn.classList.add('has-links');
       linkBtn.setAttribute('aria-label', 'Szavak hozzárendelése ehhez a mondathoz');
+      linkBtn.addEventListener('click', async (ev) => {
+        ev.stopPropagation();
+        if(memoryTrashMode) return;
+        const currentNums = (entry.linkedWordIds || [])
+          .map(id => visible.findIndex(v => v.id === id))
+          .filter(i => i >= 0).map(i => i + 1);
+        const answer = await askForLinks(currentNums.join(', '));
+        if(answer === null) return;
+        const ids = [];
+        answer.split(/[,\s]+/).filter(Boolean).forEach(part => {
+          const n = parseInt(part, 10);
+          const target = (!isNaN(n) && n >= 1 && n <= visible.length) ? visible[n - 1] : null;
+          if(target && target.id !== entry.id && !ids.includes(target.id)) ids.push(target.id);
+        });
+        entry.linkedWordIds = ids;
+        entry.updatedAt = Date.now();
+        saveMemoryToDisk();
+        renderMemoryTable();
+      });
       linkTd.appendChild(linkBtn);
 
       // Sorra kattintás
