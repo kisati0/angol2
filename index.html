@@ -1520,8 +1520,8 @@
   .ebook-library{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:16px; padding:4px 0 20px; }
   .ebook-card{ appearance:none; border:0; background:transparent; color:var(--ink); padding:0; text-align:left; cursor:pointer; min-width:0; }
   .ebook-card-cover{ aspect-ratio:2/3; width:100%; border-radius:9px; overflow:hidden; border:1px solid var(--line); background:linear-gradient(145deg,var(--card),var(--neutral-bg)); box-shadow:0 4px 12px rgba(0,0,0,.12); display:flex; align-items:center; justify-content:center; }
-  .ebook-card-cover img{ width:100%; height:100%; object-fit:cover; }
-  .ebook-card-fallback{ padding:13px; text-align:center; overflow-wrap:anywhere; font-family:'Fraunces',serif; font-size:15px; line-height:1.25; }
+  .ebook-card-cover img{ width:100%; height:100%; object-fit:cover; -webkit-touch-callout:none; user-select:none; -webkit-user-drag:none; }
+  .ebook-card-fallback{ padding:13px; text-align:center; overflow-wrap:anywhere; font-family:'Fraunces',serif; font-size:15px; line-height:1.25; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
   .ebook-card-title{ display:none; }
   .ebook-settings-menu{ display:none; position:absolute; z-index:3; inset:calc(10px + var(--top-offset,0px)) 10px auto; max-height:calc(100% - 20px - var(--top-offset,0px)); overflow:auto; border:1px solid var(--line); border-radius:14px; padding:12px; background:var(--bg); box-shadow:0 15px 45px rgba(0,0,0,.30); }
   .ebook-settings-menu.show{ display:block; }
@@ -1545,7 +1545,7 @@
   .ebook-reader-view.bar-top .ebook-viewer{ margin-top:0; }
   .ebook-viewer{ transition:transform .18s ease-out; will-change:transform; }
   .ebook-bar-translation{ position:relative; max-height:none; overflow:visible; min-width:0; }
-  .ebook-bar{ position:relative; z-index:5; background:#1e1d1c; box-shadow:0 3px 10px rgba(0,0,0,.28); }
+  .ebook-bar{ position:relative; z-index:5; background:#1e1d1c; box-shadow:0 5px 14px rgba(0,0,0,.42); }
   .ebook-bar.has-translation .ebook-bar-translation{ position:absolute; left:0; right:148px; z-index:0; padding:10px 12px 26px; background:linear-gradient(to bottom,rgba(20,18,15,.92) 0%,rgba(20,18,15,.88) 65%,rgba(20,18,15,0) 100%); text-shadow:0 1px 2px #000; pointer-events:none; }
   .ebook-reader-view.bar-top .ebook-bar.has-translation .ebook-bar-translation{ top:100%; }
   .ebook-reader-view.bar-bottom .ebook-bar.has-translation .ebook-bar-translation{ bottom:100%; background:linear-gradient(to top,rgba(20,18,15,.92) 0%,rgba(20,18,15,.88) 65%,rgba(20,18,15,0) 100%); }
@@ -5165,6 +5165,7 @@
   // Több könyvből álló könyvtár. A teljes EPUB csak megnyitáskor kerül memóriába;
   // a főoldal kizárólag a kicsi borító/metaadatokat olvassa be.
   const ebookLibrary = document.getElementById('ebookLibrary');
+  ebookLibrary.addEventListener('contextmenu',e=>{ if(e.target.closest('.ebook-card')) e.preventDefault(); });
   const ebookSettingsMenu = document.getElementById('ebookSettingsMenu');
   const ebookMenuBtn = document.getElementById('ebookMenuBtn');
   const ebookUploadNewBtn = document.getElementById('ebookUploadNewBtn');
