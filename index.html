@@ -1523,10 +1523,10 @@
   .ebook-card-cover img{ width:100%; height:100%; object-fit:cover; -webkit-touch-callout:none; user-select:none; -webkit-user-drag:none; }
   .ebook-card-fallback{ padding:13px; text-align:center; overflow-wrap:anywhere; font-family:'Fraunces',serif; font-size:15px; line-height:1.25; user-select:none; -webkit-user-select:none; -webkit-touch-callout:none; }
   .ebook-card-title{ display:none; }
-  .ebook-settings-menu{ display:none; position:absolute; z-index:3; inset:calc(10px + var(--top-offset,0px)) 10px auto; max-height:calc(100% - 20px - var(--top-offset,0px)); overflow:auto; border:1px solid var(--line); border-radius:14px; padding:12px; background:var(--bg); box-shadow:0 15px 45px rgba(0,0,0,.30); }
+  .ebook-settings-menu{ display:none; position:absolute; z-index:3; top:calc(54px + var(--top-offset,0px)); left:10px; right:10px; max-height:calc(100% - 64px - var(--top-offset,0px)); overflow:auto; border:1px solid var(--line); border-radius:14px; padding:12px; background:var(--bg); box-shadow:0 15px 45px rgba(0,0,0,.30); }
   .ebook-settings-menu.show{ display:block; }
   .ebook-settings-menu .ebook-settings-body{ gap:8px; }
-  .ebook-settings-menu .ebook-setting-block{ padding:9px 10px; }
+  .ebook-settings-menu .ebook-setting-block{ padding:9px 10px; min-height:76px; display:flex; flex-direction:column; justify-content:center; }
   .ebook-settings-menu .ebook-setting-label{ margin-bottom:5px; }
   .ebook-settings-menu .ebook-settings-body{ display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; }
   .ebook-settings-menu .ebook-setting-block{ min-width:0; }
@@ -1535,6 +1535,7 @@
   .ebook-settings-menu .margin-row b{ min-width:34px; }
   .ebook-settings-menu .ebook-setting-block:last-child{ grid-column:1/-1; }
   .ebook-settings-menu .ebook-setting-block:has(#ebookUploadNewBtn){ grid-column:1; grid-row:1; }
+  .ebook-settings-menu .ebook-setting-block:has(#ebookLineDecBtn){ display:none; }
   .ebook-settings-close{ float:right; margin:-3px -3px 5px 6px; }
   .ebook-menu-btn{ margin-left:auto; margin-right:8px; }
   .ebook-reader-view{ transition:none; padding-top:var(--ebook-top-offset,0px); padding-bottom:var(--ebook-bottom-offset,0px); }
@@ -3933,6 +3934,7 @@
   async function translateMyMemory(text, langpair){
     const url = "https://api.mymemory.translated.net/get?q=" + encodeURIComponent(text) + "&langpair=" + langpair;
     const response = await fetch(url);
+    if(!response.ok) throw new Error('mymemory failed');
     const data = await response.json();
     const translated = data && data.responseData && data.responseData.translatedText;
     if(!translated) throw new Error('no result');
@@ -3968,7 +3970,14 @@
     const chain = API_ORDER[activeApi] || API_ORDER.google;
     let lastErr = null;
     for(const name of chain){
-      try{ return await callProvider(name, text, from, to, langpair); }
+      try{
+        const result = await callProvider(name, text, from, to, langpair);
+        if(name !== activeApi){
+          activeApi = name;
+          try{ localStorage.setItem(API_KEY_STORE, activeApi); }catch(e){}
+        }
+        return result;
+      }
       catch(e){ lastErr = e; }
     }
     throw lastErr || new Error('translation failed');
@@ -5220,6 +5229,7 @@
   ebookMenuBtn.addEventListener('click',()=>{ebookSettingsMenu.classList.toggle('show'); ebookSettingsMenu.setAttribute('aria-hidden',String(!ebookSettingsMenu.classList.contains('show')));});
   ebookThemeSelect.value=ebookSettings.theme; ebookThemeSelect.addEventListener('change',()=>{ebookSettings.theme=ebookThemeSelect.value;ebookSaveSettings();ebookApplySettingsUI();ebookApplyRenditionStyles();});
   document.getElementById('ebookSettingsCloseBtn').addEventListener('click',()=>{ebookSettingsMenu.classList.remove('show');ebookSettingsMenu.setAttribute('aria-hidden','true');});
+  document.addEventListener('click',e=>{ if(ebookSettingsMenu.classList.contains('show') && !ebookSettingsMenu.contains(e.target) && e.target!==ebookMenuBtn){ ebookSettingsMenu.classList.remove('show'); ebookSettingsMenu.setAttribute('aria-hidden','true'); } });
   document.getElementById('ebookMarginBtn').addEventListener('click',()=>openMarginOverlay('ebook'));
   ebookOpenBtn.addEventListener('click',()=>{ebookSettings.barPos='top';ebookSaveSettings();});
   const ebookOpenBookWithTopBar = ebookOpenBook;
