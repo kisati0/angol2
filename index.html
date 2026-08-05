@@ -568,7 +568,11 @@
   .memory-lang-frame.find-on{
     box-shadow: 0 0 0 3px rgba(255,255,255,0.25), 0 0 16px 4px rgba(255,255,255,0.35);
   }
-  #memoryBookBtn{ margin-left:6px; flex-shrink:0; }
+  #memoryJumpTopBtn{ display:none; }
+  .memory-book-controls{ margin-left:6px; display:flex; flex-direction:column; gap:4px; }
+  #memoryBookBtn,#memoryRulesBtn{ margin:0; flex-shrink:0; }
+  #memoryRulesBtn{ display:none; }
+  .memory-overlay.book-mode #memoryRulesBtn{ display:flex; }
   #memoryBookBtn.active{ background:rgba(var(--paprika-rgb),.18); border-color:var(--paprika); box-shadow:0 0 12px rgba(var(--paprika-rgb),.35); }
   .memory-book-grid{ display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; padding:8px 0; }
   .memory-chapter-card{ appearance:none; min-height:76px; border:1px solid var(--line); border-radius:10px; background:var(--card); color:var(--ink); cursor:pointer; padding:8px 5px; font-family:'Fraunces',serif; font-size:13px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4px; }
@@ -576,6 +580,9 @@
   .memory-chapter-card.selected{ outline:2px solid var(--teal); background:rgba(31,76,70,.15); }
   .memory-overlay.book-mode .memory-toolbar{ gap:3px; }
   .memory-overlay.book-mode .memory-toolbar .mem-toolbar-btn{ flex:0 1 auto; padding:6px 5px; font-size:10px; }
+  .memory-toolbar{ justify-content:flex-end; }
+  .memory-toolbar #memoryNoteBtn{ margin-right:auto; }
+  .memory-toolbar .mem-toolbar-btn{ flex:0 0 42%; }
   .memory-book-back{ margin:4px 0 8px; }
   #practiceNextGroupBtn.flash-white{
     box-shadow: 0 0 0 3px rgba(255,255,255,0.25), 0 0 16px 4px rgba(255,255,255,0.35);
@@ -1862,7 +1869,7 @@
     <div class="memory-panel">
       <div class="memory-sticky-top">
         <div class="memory-header">
-          <button class="memory-lang-frame" id="memoryLangTag">EN</button><button class="memory-lang-frame" id="memoryBookBtn" aria-label="Könyvfordítások">📖</button>
+          <button class="memory-lang-frame" id="memoryLangTag">EN</button><div class="memory-book-controls"><button class="memory-lang-frame" id="memoryBookBtn" aria-label="Könyvfordítások">📖</button><button class="memory-lang-frame" id="memoryRulesBtn" aria-label="AI CSV-szabályok letöltése">📥</button></div>
           <div class="memory-header-btns">
             <button class="header-icon-btn" id="memoryAllBtn" style="display:none;">ALL</button>
             <button class="header-icon-btn" id="memoryAddBtn" aria-label="Kijelölés a szótárba">＋</button>
@@ -2151,6 +2158,7 @@
   const memoryAddBtn = document.getElementById('memoryAddBtn');
   const memoryLangTag = document.getElementById('memoryLangTag');
   const memoryBookBtn = document.getElementById('memoryBookBtn');
+  const memoryRulesBtn = document.getElementById('memoryRulesBtn');
   const memoryBookView = document.getElementById('memoryBookView');
   const memoryColHead = document.getElementById('memoryColHead');
   const memoryColHeadSentence = document.getElementById('memoryColHeadSentence');
@@ -2278,7 +2286,6 @@
       document.getElementById('memoryBookBackBtn').addEventListener('click',()=>{memoryBookChapter=null;renderMemoryBookView();}); return; }
     const keys=Object.keys(chapters).sort((a,b)=>Number(a)-Number(b));
     memoryBookView.innerHTML=keys.length?'<div class="memory-book-grid">'+keys.map(ch=>'<button class="memory-chapter-card" data-chapter="'+escapeHtml(ch)+'">'+escapeHtml('Fejezet '+ch)+'<small>'+chapters[ch].length+' mondat</small></button>').join('')+'</div>':'<div class="empty-state">Ehhez a könyvhöz még nincs feltöltött fejezetfordítás.</div>';
-    const rulesBtn=document.createElement('button'); rulesBtn.className='icon-btn'; rulesBtn.textContent='AI CSV-szabályok letöltése'; rulesBtn.addEventListener('click',()=>downloadBookCsvRules()); memoryBookView.appendChild(rulesBtn);
     memoryBookView.querySelectorAll('[data-chapter]').forEach(btn=>{ const chapter=btn.dataset.chapter; btn.classList.toggle('selected',memorySelectedIds.has('chapter:'+chapter)); btn.addEventListener('click',()=>{ if(memorySelectMode){ const id='chapter:'+chapter; memorySelectedIds.has(id)?memorySelectedIds.delete(id):memorySelectedIds.add(id); renderMemoryBookView(); return; } if(memoryTrashMode){ const all=loadBookTranslations(),bookId=currentTranslationBookId(); if(all[bookId]){ delete all[bookId][chapter]; if(!Object.keys(all[bookId]).length) delete all[bookId]; saveBookTranslations(all); } renderMemoryBookView(); return; } memoryBookChapter=chapter;renderMemoryBookView(); }); });
   }
   function downloadBookCsvRules(){ if(!confirm('Letöltöd az AI-nak szóló CSV-generálási szabályokat?'))return; const rules=`FEJEZETFORDÍTÓ CSV – AI SABLON
@@ -2471,6 +2478,7 @@ Fordítandó eredeti szöveg:
     renderMemoryTable();
   });
   memoryBookBtn.addEventListener('click',()=>{ memoryBookMode=!memoryBookMode; memoryBookChapter=null; memoryBookBtn.classList.toggle('active',memoryBookMode); memoryOverlay.classList.toggle('book-mode',memoryBookMode); memoryLangTag.classList.toggle('find-on',false); renderMemoryTable(); });
+  memoryRulesBtn.addEventListener('click',()=>downloadBookCsvRules());
 
   const memoryNoteBtn = document.getElementById('memoryNoteBtn');
   memoryNoteBtn.addEventListener('click', () => {
@@ -2869,8 +2877,12 @@ Fordítandó eredeti szöveg:
   memoryJumpTopBtn.addEventListener('click', () => {
     memoryTableWrap.scrollTop = 0;
   });
+  let memoryJumpAtBottom=false;
   memoryJumpBottomBtn.addEventListener('click', () => {
-    memoryTableWrap.scrollTop = memoryTableWrap.scrollHeight;
+    memoryJumpAtBottom=!memoryJumpAtBottom;
+    memoryTableWrap.scrollTop=memoryJumpAtBottom?memoryTableWrap.scrollHeight:0;
+    memoryJumpBottomBtn.textContent=memoryJumpAtBottom?'⤒':'⤓';
+    memoryJumpBottomBtn.setAttribute('aria-label',memoryJumpAtBottom?'Ugrás az elejére':'Ugrás a végére');
   });
 
   memoryImportBtn.addEventListener('click', () => {
