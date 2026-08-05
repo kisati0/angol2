@@ -1160,6 +1160,7 @@
     font-size: 14px;
   }
   .link-overlay.show{ display: flex; }
+  #marginOverlay{ z-index:500; }
   .link-panel{
     position: relative;
     background: var(--card);
@@ -1536,6 +1537,9 @@
   .ebook-settings-close{ float:right; margin:-3px -3px 5px 6px; }
   .ebook-menu-btn{ margin-left:auto; margin-right:8px; }
   .ebook-reader-view{ transition:none; padding-top:var(--ebook-top-offset,0px); padding-bottom:var(--ebook-bottom-offset,0px); }
+  /* A felső e-könyv margó a vezérlősávot magasítja, nem üres hátteret hagy fölötte. */
+  .ebook-reader-view{ padding-top:0; }
+  .ebook-reader-view.bar-top .ebook-bar{ padding-top:calc(12px + var(--ebook-top-offset,0px)); }
   .ebook-viewer{ transition:transform .18s ease-out; will-change:transform; }
   .ebook-bar-translation{ position:relative; max-height:none; overflow:visible; min-width:0; }
   .ebook-bar{ position:relative; z-index:5; }
@@ -1684,8 +1688,8 @@
         <div class="ebook-setting-block">
           <div class="ebook-setting-label">Betűtípus</div>
           <select id="ebookFontFamilySelect" class="ebook-select">
-            <option value="serif">Klasszikus (serif)</option>
-            <option value="sans">Modern (sans-serif)</option>
+            <option value="serif">Klasszikus</option>
+            <option value="sans">Modern</option>
             <option value="dyslexic">Jól olvasható</option>
           </select>
         </div>
@@ -4828,7 +4832,8 @@
       ebookBarTranslation.textContent = found[huField];
       return;
     }
-    ebookBarTranslation.textContent = '…';
+    // Lekérés közben nem mutatunk betöltésjelzőt, hogy a felső sáv ne ugorjon meg.
+    ebookBarTranslation.textContent = '';
     try{
       const result = await translate(text, ebookSettings.lang + '|hu');
       ebookBarTranslation.textContent = result;
@@ -5163,7 +5168,7 @@
   ebookHandleWordSelect=function(span,doc){ ebookSelectionIsSentence=false; ebookOriginalWordSelect(span,doc); ebookSetTapPlay(span.dataset.word); };
   ebookExitToSettings=function(){ ebookStopSpeaking(); ebookReaderView.classList.remove('show'); ebookReaderView.style.transform=''; ebookReaderView.style.opacity=''; ebookSettingsView.classList.remove('hide'); ebookClearTranslation(); ebookRefreshLibrary(); };
   const ebookOriginalRendered=ebookOnContentRendered;
-  ebookOnContentRendered=function(contents){ ebookOriginalRendered(contents); const doc=contents.document; let x=0,y=0; doc.addEventListener('click',e=>{if(!e.target.closest('.ebook-word')) ebookClearTranslation();try{window.speechSynthesis.cancel();}catch(err){} ebookPlaying=false; ebookPlayBtn.textContent='▶';}); doc.addEventListener('touchstart',e=>{x=e.touches[0].clientX;y=e.touches[0].clientY;},{passive:true}); doc.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-x,dy=e.changedTouches[0].clientY-y;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)){try{dx<0?ebookRendition.next():ebookRendition.prev();}catch(err){}}else if(Math.abs(dy)>70&&Math.abs(dy)>Math.abs(dx)){ebookExitToSettings();}},{passive:true}); };
+  ebookOnContentRendered=function(contents){ ebookOriginalRendered(contents); const doc=contents.document; let x=0,y=0; doc.addEventListener('click',e=>{if(!e.target.closest('.ebook-word')){ ebookClearTranslation(); doc.querySelectorAll('.ebook-word-active,.ebook-sentence-active').forEach(el=>el.classList.remove('ebook-word-active','ebook-sentence-active')); ebookCurrentWord=null; ebookCurrentSentenceIdx=null; try{window.speechSynthesis.cancel();}catch(err){} ebookPlaying=false; ebookPlayBtn.textContent='▶'; }}); doc.addEventListener('touchstart',e=>{x=e.touches[0].clientX;y=e.touches[0].clientY;},{passive:true}); doc.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-x,dy=e.changedTouches[0].clientY-y;if(Math.abs(dx)>45&&Math.abs(dx)>Math.abs(dy)){try{dx<0?ebookRendition.next():ebookRendition.prev();}catch(err){}}else if(Math.abs(dy)>70&&Math.abs(dy)>Math.abs(dx)){ebookExitToSettings();}},{passive:true}); };
   ebookSaveBtn.addEventListener('click',()=>{ if(ebookSelectionIsSentence && ebookCurrentSentenceIdx!=null) ebookSaveEntry({fxSentence:ebookChapterSentences[ebookCurrentSentenceIdx]}); else if(ebookCurrentWord) ebookSaveEntry({foreign:ebookCurrentWord}); else return; ebookSaveBtn.classList.add('saved');setTimeout(()=>ebookSaveBtn.classList.remove('saved'),430); });
   ebookViewer.addEventListener('click',()=>{ try{window.speechSynthesis.cancel();}catch(e){} ebookPlaying=false; ebookPlayBtn.textContent='▶'; });
   ebookBookmarkBtn.addEventListener('click',ebookSetBookmark);
